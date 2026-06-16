@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:      #0a0f1e;
+  --ink2:     #1e2d40;
+  --surface:  #f7f9fc;
+  --card:     #ffffff;
+  --emerald:  #00b37e;
+  --emerald2: #00d68f;
+  --sapphire: #1a56db;
+  --amber:    #f59e0b;
+  --muted:    #64748b;
+  --line:     #e2e8f0;
+  --done-bg:  #d1fae5;
+  --done-fg:  #065f46;
+  --pend-bg:  #fef3c7;
+  --pend-fg:  #92400e;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SETUP SCREEN ─── */
+#setup-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,179,126,0.18) 0%, transparent 70%),
+    linear-gradient(160deg, #0a0f1e 0%, #0f2035 55%, #0a1628 100%);
+}
+
+.setup-shell {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.setup-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  color: var(--emerald);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.setup-headline {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+
+.setup-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.setup-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 36px;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.field-group { display: flex; flex-direction: column; gap: 7px; }
+
+.field-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.field-group input[type="date"],
+.field-group input[type="number"] {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  color: #fff;
+  width: 100%;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+  color-scheme: dark;
+}
+
+.field-group input:focus {
+  border-color: var(--emerald);
+  background: rgba(0,179,126,0.08);
+}
+
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+.cat-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cat-label-row span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cat-label-row .cat-count {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+}
+
+#category-list { display: flex; flex-direction: column; gap: 10px; }
+
+.cat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.cat-row input {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+
+.cat-row input::placeholder { color: rgba(255,255,255,0.25); }
+.cat-row input:focus { border-color: var(--emerald); background: rgba(0,179,126,0.08); }
+
+.rm-btn {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,80,80,0.1);
+  color: rgba(255,120,120,0.7);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.rm-btn:hover { background: rgba(255,80,80,0.25); color: #ff8080; }
+
+.add-cat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px dashed rgba(0,179,126,0.35);
+  background: transparent;
+  color: var(--emerald);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+  font-family: var(--sans);
+}
+.add-cat:hover { background: rgba(0,179,126,0.08); border-color: var(--emerald); }
+
+.gen-btn {
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--emerald) 0%, #00a070 100%);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 24px rgba(0,179,126,0.35);
+  margin-top: 4px;
+}
+.gen-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(0,179,126,0.45); }
+.gen-btn:active { transform: translateY(0); }
+
+/* ─── TRACKER SCREEN ─── */
+#tracker-screen { display: none; flex-direction: column; min-height: 100vh; }
+
+/* Header bar */
+.t-header {
+  background: linear-gradient(135deg, #0a0f1e 0%, #0f2035 100%);
+  padding: 20px 28px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.35);
+}
+
+.t-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.t-title-block {}
+
+.t-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--emerald);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.t-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.reset-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+}
+.reset-btn:hover { background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.4); color: #ff8080; }
+
+/* Dashboard panels */
+.dash-panels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.dash-panel {
+  padding: 14px 18px 16px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.dash-panel:last-child { border-right: none; }
+
+.dp-label {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 10px;
+}
+
+.dp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.dp-row .dp-key { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.dp-row .dp-val {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--emerald2);
+}
+
+.dp-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  margin: 3px 0 7px;
+  overflow: hidden;
+}
+.dp-bar .dp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--emerald), var(--emerald2));
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.dp-start {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.25);
+  padding: 8px 18px 12px;
+}
+
+/* Week nav */
+.week-nav {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.wn-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.wk-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.wk-btn.active {
+  background: var(--ink2);
+  color: var(--emerald2);
+  border-color: var(--ink2);
+}
+.wk-btn:hover:not(.active) { background: var(--surface); color: var(--ink); }
+
+/* Table */
+.table-outer { overflow-x: auto; padding-bottom: 80px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+  font-size: 0.82rem;
+}
+
+/* Section header row (Week N) */
+tr.week-hdr td {
+  background: var(--ink2) !important;
+  color: rgba(255,255,255,0.5);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: none;
+}
+tr.week-hdr td span { color: var(--emerald2); }
+
+thead th {
+  background: var(--ink);
+  color: rgba(255,255,255,0.55);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 10px;
+  text-align: center;
+  border: none;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+thead th:nth-child(1),
+thead th:nth-child(2),
+thead th:nth-child(3) { text-align: left; }
+
+tbody tr { border-bottom: 1px solid var(--line); }
+tbody tr:hover td { background: rgba(0,179,126,0.04) !important; }
+
+td {
+  padding: 9px 10px;
+  vertical-align: middle;
+}
+
+.td-week {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: #f1f5f9 !important;
+  border-right: 2px solid var(--line);
+  white-space: nowrap;
+  min-width: 68px;
+}
+
+.td-section {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--sapphire);
+  min-width: 110px;
+}
+
+.td-target {
+  font-size: 0.78rem;
+  color: var(--muted);
+  min-width: 150px;
+  line-height: 1.4;
+}
+
+.td-day {
+  text-align: center;
+  padding: 6px 4px;
+  min-width: 48px;
+}
+
+.day-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 26px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--line);
+  background: var(--pend-bg);
+  color: var(--pend-fg);
+  transition: all 0.15s;
+  user-select: none;
+}
+.day-pill:hover { transform: scale(1.1); }
+.day-pill.done {
+  background: var(--done-bg);
+  color: var(--done-fg);
+  border-color: #6ee7b7;
+}
+
+.td-pct { text-align: center; min-width: 72px; }
+
+.pct-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.pct-chip.full { background: var(--done-bg); color: var(--done-fg); border-color: #6ee7b7; }
+.pct-chip.mid  { background: var(--pend-bg); color: var(--pend-fg); border-color: #fcd34d; }
+
+/* Summary row */
+tr.sum-row td {
+  background: #0d1926 !important;
+  color: rgba(255,255,255,0.35);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 6px 10px;
+  text-align: center;
+  border: none;
+}
+tr.sum-row .sum-label { text-align: left; color: rgba(255,255,255,0.25); }
+tr.sum-row .sum-val { color: var(--emerald2); font-weight: 700; }
+tr.sum-row .sum-done { color: #6ee7b7; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink2);
+  color: var(--emerald2);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 10px 22px;
+  border-radius: 99px;
+  border: 1px solid rgba(0,214,143,0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .setup-card { padding: 24px; }
+  .setup-headline { font-size: 1.5rem; }
+  .dash-panels { grid-template-columns: 1fr; }
+  .dash-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .t-header { padding: 14px 16px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <div class="setup-shell">
+    <div class="setup-eyebrow">Study Tracker — Setup</div>
+    <div class="setup-headline">Build your plan.<br>Track every day.</div>
+    <div class="setup-sub">Enter your study window, add categories with daily targets, and your full weekly grid will be generated automatically.</div>
+
+    <div class="setup-card">
+      <div class="field-group">
+        <label>Start Date</label>
+        <input type="date" id="start-date">
+      </div>
+
+      <div class="field-group">
+        <label>Total Days in Target</label>
+        <input type="number" id="total-days" min="7" max="365" placeholder="e.g.  90">
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <div class="cat-label-row">
+          <span>Categories</span>
+          <span class="cat-count" id="cat-count">0 / 5</span>
+        </div>
+        <div id="category-list"></div>
+        <button class="add-cat" id="add-cat-btn">＋ Add category</button>
+      </div>
+
+      <button class="gen-btn" onclick="generateTracker()">Generate Tracker →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div id="tracker-screen">
+  <div class="t-header">
+    <div class="t-header-top">
+      <div class="t-title-block">
+        <div class="t-eyebrow">Study Tracker</div>
+        <div class="t-title" id="t-title">90-Day Plan</div>
+      </div>
+      <button class="reset-btn" onclick="resetTracker()">↩ New Tracker</button>
+    </div>
+
+    <div class="dash-panels">
+      <div class="dash-panel">
+        <div class="dp-label">Timeline</div>
+        <div class="dp-row"><span class="dp-key">Completed</span><span class="dp-val" id="d-done">0</span></div>
+        <div class="dp-row"><span class="dp-key">Remaining</span><span class="dp-val" id="d-left">—</span></div>
+        <div class="dp-row"><span class="dp-key">Overall</span><span class="dp-val" id="d-overall">0%</span></div>
+        <div class="dp-bar"><div class="dp-fill" id="d-overall-bar" style="width:0%"></div></div>
+      </div>
+      <div class="dash-panel">
+        <div class="dp-label">By Category</div>
+        <div id="d-cats"></div>
+      </div>
+      <div class="dash-panel">
+        <div class="dp-label">By Week</div>
+        <div id="d-weeks" style="max-height:120px;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="dp-start" id="d-start"></div>
+  </div>
+
+  <div class="week-nav">
+    <span class="wn-label">Jump</span>
+    <div id="wk-nav"></div>
+  </div>
+
+  <div class="table-outer">
+    <table>
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Section</th>
+          <th>Target</th>
+          <th>Day 1</th><th>Day 2</th><th>Day 3</th><th>Day 4</th>
+          <th>Day 5</th><th>Day 6</th><th>Day 7</th>
+          <th>Done %</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let data = null;
+
+// ── SETUP UI ──────────────────────────────────────────────
+const catList = document.getElementById('category-list');
+document.getElementById('add-cat-btn').onclick = addCat;
+
+function addCat(name='', target='') {
+  if (catList.children.length >= 5) return;
+  const row = document.createElement('div');
+  row.className = 'cat-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Category name" value="${name}" class="cn">
+    <input type="text" placeholder="Daily target" value="${target}" class="ct">
+    <button class="rm-btn" title="Remove">✕</button>
+  `;
+  row.querySelector('.rm-btn').onclick = () => { row.remove(); updateCatCount(); };
+  catList.appendChild(row);
+  updateCatCount();
+}
+
+function updateCatCount() {
+  const n = catList.children.length;
+  document.getElementById('cat-count').textContent = `${n} / 5`;
+  document.getElementById('add-cat-btn').style.display = n >= 5 ? 'none' : 'flex';
+}
+
+// defaults
+document.getElementById('start-date').valueAsDate = new Date();
+addCat('Category 1','');
+addCat('Category 2','');
+
+// ── GENERATE ─────────────────────────────────────────────
+function generateTracker() {
+  const startVal = document.getElementById('start-date').value;
+  const totalDays = parseInt(document.getElementById('total-days').value);
+  if (!startVal) { toast('Pick a start date'); return; }
+  if (!totalDays || totalDays < 7) { toast('Minimum 7 days'); return; }
+
+  const cats = [];
+  document.querySelectorAll('.cat-row').forEach(r => {
+    const n = r.querySelector('.cn').value.trim();
+    const t = r.querySelector('.ct').value.trim();
+    if (n) cats.push({ name: n, target: t || '—' });
+  });
+  if (!cats.length) { toast('Add at least one category'); return; }
+
+  const numWeeks = Math.ceil(totalDays / 7);
+  const weeks = Array.from({ length: numWeeks }, (_, i) => ({
+    wk: i + 1,
+    rows: cats.map(c => ({ section: c.name, target: c.target, days: Array(7).fill(false) }))
+  }));
+
+  data = { startDate: startVal, totalDays, categories: cats, weeks };
+  save();
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────────
+function render() {
+  document.getElementById('setup-screen').style.display = 'none';
+  const ts = document.getElementById('tracker-screen');
+  ts.style.display = 'flex';
+
+  document.getElementById('t-title').textContent = `${data.totalDays}-Day Study Plan`;
+
+  buildNav();
+  buildTable();
+  updateDash();
+}
+
+function buildNav() {
+  const nav = document.getElementById('wk-nav');
+  nav.innerHTML = '';
+  data.weeks.forEach((w, i) => {
+    const b = document.createElement('button');
+    b.className = 'wk-btn' + (i === 0 ? ' active' : '');
+    b.textContent = `W${w.wk}`;
+    b.onclick = () => {
+      document.querySelectorAll('.wk-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById(`wa-${w.wk}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(b);
+  });
+}
+
+function buildTable() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  data.weeks.forEach(w => {
+    // Week anchor header
+    const hdr = document.createElement('tr');
+    hdr.className = 'week-hdr';
+    hdr.id = `wa-${w.wk}`;
+    const htd = document.createElement('td');
+    htd.colSpan = 11;
+    htd.innerHTML = `WEEK <span>${w.wk}</span>`;
+    hdr.appendChild(htd);
+    tbody.appendChild(hdr);
+
+    // Category rows
+    w.rows.forEach((row, ri) => {
+      const tr = document.createElement('tr');
+
+      if (ri === 0) {
+        const wtd = document.createElement('td');
+        wtd.className = 'td-week';
+        wtd.rowSpan = w.rows.length;
+        wtd.textContent = `Wk ${w.wk}`;
+        tr.appendChild(wtd);
+      }
+
+      const std = document.createElement('td');
+      std.className = 'td-section';
+      std.textContent = row.section;
+      tr.appendChild(std);
+
+      const ttd = document.createElement('td');
+      ttd.className = 'td-target';
+      ttd.textContent = row.target;
+      tr.appendChild(ttd);
+
+      row.days.forEach((done, di) => {
+        const td = document.createElement('td');
+        td.className = 'td-day';
+        const pill = document.createElement('div');
+        pill.className = 'day-pill' + (done ? ' done' : '');
+        pill.textContent = done ? '✓' : '–';
+        pill.onclick = () => toggle(w.wk, ri, di, pill, tr);
+        td.appendChild(pill);
+        tr.appendChild(td);
+      });
+
+      const pct = calcPct(row.days);
+      const ctd = document.createElement('td');
+      ctd.className = 'td-pct';
+      ctd.innerHTML = `<span class="pct-chip ${pct===100?'full':pct>0?'mid':''}">${pct}%</span>`;
+      tr.appendChild(ctd);
+
+      tbody.appendChild(tr);
+    });
+
+    // Summary row
+    const sr = document.createElement('tr');
+    sr.className = 'sum-row';
+    sr.id = `sr-${w.wk}`;
+    const sl = document.createElement('td');
+    sl.colSpan = 3; sl.className = 'sum-label';
+    sl.textContent = `Week ${w.wk} summary`;
+    sr.appendChild(sl);
+    for (let d = 0; d < 7; d++) {
+      const allDone = w.rows.every(r => r.days[d]);
+      const td = document.createElement('td');
+      td.innerHTML = allDone && w.rows.length ? `<span class="sum-done">✓</span>` : '–';
+      sr.appendChild(td);
+    }
+    const wPct = calcPct(w.rows.flatMap(r => r.days));
+    const sp = document.createElement('td');
+    sp.innerHTML = `<span class="sum-val">${wPct}%</span>`;
+    sr.appendChild(sp);
+    tbody.appendChild(sr);
+  });
+}
+
+function toggle(wk, ri, di, pill, tr) {
+  const w = data.weeks.find(x => x.wk === wk);
+  w.rows[ri].days[di] = !w.rows[ri].days[di];
+  const done = w.rows[ri].days[di];
+  pill.className = 'day-pill' + (done ? ' done' : '');
+  pill.textContent = done ? '✓' : '–';
+
+  // update % chip
+  const chip = tr.querySelector('.pct-chip');
+  const pct = calcPct(w.rows[ri].days);
+  chip.textContent = pct + '%';
+  chip.className = 'pct-chip' + (pct===100?' full':pct>0?' mid':'');
+
+  // update summary row
+  refreshSumRow(w);
+  save();
+  updateDash();
+}
+
+function refreshSumRow(w) {
+  const sr = document.getElementById(`sr-${w.wk}`);
+  if (!sr) return;
+  const cells = sr.querySelectorAll('td');
+  for (let d = 0; d < 7; d++) {
+    const allDone = w.rows.every(r => r.days[d]);
+    cells[d + 1].innerHTML = allDone && w.rows.length ? `<span class="sum-done">✓</span>` : '–';
+  }
+  const wPct = calcPct(w.rows.flatMap(r => r.days));
+  cells[8].innerHTML = `<span class="sum-val">${wPct}%</span>`;
+}
+
+function updateDash() {
+  const sd = new Date(data.startDate);
+  const today = new Date(); today.setHours(0,0,0,0); sd.setHours(0,0,0,0);
+  const elapsed = Math.max(0, Math.min(data.totalDays, Math.floor((today - sd) / 86400000)));
+  document.getElementById('d-done').textContent = elapsed;
+  document.getElementById('d-left').textContent = Math.max(0, data.totalDays - elapsed);
+
+  const allD = data.weeks.flatMap(w => w.rows.flatMap(r => r.days));
+  const pct = calcPct(allD);
+  document.getElementById('d-overall').textContent = pct + '%';
+  document.getElementById('d-overall-bar').style.width = pct + '%';
+  document.getElementById('d-start').textContent = `Started: ${fmtDate(sd)}   ·   Target: ${data.totalDays} days`;
+
+  // categories
+  const catDiv = document.getElementById('d-cats');
+  catDiv.innerHTML = '';
+  data.categories.forEach(c => {
+    const days = data.weeks.flatMap(w => w.rows.filter(r => r.section === c.name).flatMap(r => r.days));
+    const p = calcPct(days);
+    catDiv.innerHTML += `
+      <div class="dp-row"><span class="dp-key">${c.name}</span><span class="dp-val">${p}%</span></div>
+      <div class="dp-bar"><div class="dp-fill" style="width:${p}%"></div></div>
+    `;
+  });
+
+  // weeks
+  const wDiv = document.getElementById('d-weeks');
+  wDiv.innerHTML = '';
+  data.weeks.forEach(w => {
+    const p = calcPct(w.rows.flatMap(r => r.days));
+    wDiv.innerHTML += `<div class="dp-row"><span class="dp-key">Week ${w.wk}</span><span class="dp-val">${p}%</span></div>`;
+  });
+}
+
+// ── UTILS ────────────────────────────────────────────────
+function calcPct(arr) {
+  return arr.length ? Math.round(arr.filter(Boolean).length / arr.length * 100) : 0;
+}
+
+function fmtDate(d) {
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── PERSIST ──────────────────────────────────────────────
+function save() { localStorage.setItem('strack', JSON.stringify(data)); }
+
+function load() {
+  try {
+    const raw = localStorage.getItem('strack');
+    if (raw) { data = JSON.parse(raw); return true; }
+  } catch {}
+  return false;
+}
+
+function resetTracker() {
+  if (!confirm('Clear all progress and start a new tracker?')) return;
+  localStorage.removeItem('strack');
+  data = null;
+  document.getElementById('tracker-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'flex';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+if (load()) render();
+</script>
+</body>
+</html>
