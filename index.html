@@ -12,7 +12,7 @@
   --body-bg:  #f3f4f6;
   --card-bg:  #ffffff;
   
-  --emerald:  #2dd4bf; /* Teal/Greenish */
+  --emerald:  #2dd4bf;
   --emerald2: #14b8a6;
   --blue:     #3b82f6;
   --orange:   #f97316;
@@ -34,7 +34,7 @@
 
 body {
   font-family: var(--sans);
-  background: var(--dash-bg); /* Default to dark for setup */
+  background: var(--dash-bg);
   color: #fff;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -49,7 +49,7 @@ body {
   padding: 24px;
 }
 
-.setup-shell { width: 100%; max-width: 540px; display: flex; flex-direction: column; gap: 0; }
+.setup-shell { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 0; }
 .setup-headline { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 6px; }
 .setup-sub { font-size: 0.88rem; color: rgba(255,255,255,0.6); margin-bottom: 32px; line-height: 1.6; }
 
@@ -104,7 +104,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .cat-label-row .cat-count { font-family: var(--mono); color: rgba(255,255,255,0.4); }
 
 #category-list { display: flex; flex-direction: column; gap: 10px; }
-.cat-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; }
+.cat-row { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 8px; }
 .rm-btn {
   width: 42px; height: 42px;
   border-radius: 10px; border: none;
@@ -199,7 +199,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .p-bar { height: 100%; border-radius: 4px; transition: 0.4s; }
 .p-pct { font-size: 0.85rem; font-family: var(--mono); color: var(--blue); font-weight: 600; text-align: right; }
 
-/* Mini Cal specific styling for Dash Box */
+/* Mini Cal */
 .mc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .mc-month { font-size: 0.85rem; font-weight: 700; color: #fff; }
 .mc-nav { display: flex; gap: 4px; }
@@ -232,10 +232,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .nav-btn.active { background: var(--dash-bg); color: var(--emerald); }
 
 /* Main Tracker Area */
-.tracker-content {
-  max-width: 800px; margin: 0 auto; padding: 24px 20px 60px;
-  color: var(--text-main); width: 100%;
-}
+.tracker-content { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; color: var(--text-main); width: 100%; }
 
 .week-section { margin-bottom: 32px; }
 .week-header {
@@ -249,7 +246,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .wh-pct { color: var(--emerald); font-family: var(--mono); font-weight: 700; font-size: 1rem; }
 
 .cards-container {
-  background: #e2e8f0; /* Outer border look */
+  background: #e2e8f0; 
   padding: 1px;
   border-radius: 0 0 12px 12px;
   display: flex; flex-direction: column; gap: 1px;
@@ -261,6 +258,21 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .cc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .cc-name { font-size: 1.1rem; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
 .cc-target { font-size: 0.85rem; color: var(--text-mut); font-weight: 500; }
+.cc-top-right { display: flex; align-items: center; gap: 8px; }
+
+/* Remaining Days Circle */
+.rem-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(59,130,246,0.1);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(59,130,246,0.3);
+  flex-shrink: 0;
+}
 
 .pct-chip {
   padding: 4px 12px; border-radius: 99px;
@@ -281,10 +293,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 .ob-day { text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--text-mut); }
 
 /* Check Buttons */
-.checks-row {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
-  padding: 0 8px; /* Align with inner box */
-}
+.checks-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 0 8px; }
 .check-btn-wrap { display: flex; justify-content: center; }
 .check-btn {
   width: 100%; aspect-ratio: 1; max-width: 44px;
@@ -300,6 +309,9 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 @media (max-width: 640px) {
   .dash-grid { grid-template-columns: 1fr; }
   .setup-card { padding: 20px; }
+  .cat-row { grid-template-columns: 1fr 1fr; }
+  .cat-row .cd { grid-column: span 2; }
+  .cat-row .rm-btn { grid-column: span 2; width: 100%; }
   .orange-box { padding: 4px; gap: 2px; }
   .checks-row { padding: 0 4px; gap: 2px; }
   .check-btn { border-width: 1px; font-size: 1rem; border-radius: 6px; }
@@ -318,7 +330,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
 <div id="setup-screen">
   <div class="setup-shell">
     <div class="setup-headline">Build your plan.</div>
-    <div class="setup-sub">Enter your study window and up to 10 categories.</div>
+    <div class="setup-sub">Enter your overall study duration and up to 10 categories with custom day targets.</div>
 
     <div class="setup-card">
       <div class="field-group">
@@ -327,7 +339,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
       </div>
 
       <div class="field-group">
-        <label>Duration</label>
+        <label>Overall Duration (Days)</label>
         <div class="preset-btns" id="duration-presets">
           <button class="preset-btn" data-days="7">7d</button>
           <button class="preset-btn" data-days="14">14d</button>
@@ -335,7 +347,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
           <button class="preset-btn" data-days="90">90d</button>
           <button class="preset-btn active" data-days="custom">Custom</button>
         </div>
-        <input type="number" id="total-days" min="7" max="365" placeholder="Enter days...">
+        <input type="number" id="total-days" min="7" max="365" placeholder="Total overall days...">
       </div>
 
       <div class="divider"></div>
@@ -427,11 +439,9 @@ let data = null;
 const maxCats = 10;
 const catList = document.getElementById('category-list');
 
-// Init Date
 const _today = new Date();
 document.getElementById('start-date').value = _today.toISOString().split('T')[0];
 
-// Setup Presets Logic
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.onclick = (e) => {
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
@@ -448,14 +458,15 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   };
 });
 
-document.getElementById('add-cat-btn').onclick = () => addCat('','');
-function addCat(name='', target='') {
+document.getElementById('add-cat-btn').onclick = () => addCat('','','');
+function addCat(name='', target='', days='') {
   if (catList.children.length >= maxCats) return;
   const row = document.createElement('div');
   row.className = 'cat-row';
   row.innerHTML = `
     <input type="text" placeholder="Category name" value="${name}" class="cn">
     <input type="text" placeholder="Target / Chapter" value="${target}" class="ct">
+    <input type="number" placeholder="Days" value="${days}" class="cd" min="1" title="Custom target days for this category">
     <button class="rm-btn" title="Remove">✕</button>
   `;
   row.querySelector('.rm-btn').onclick = () => { row.remove(); updateCatCount(); };
@@ -469,10 +480,9 @@ function updateCatCount() {
   document.getElementById('add-cat-btn').style.display = n >= maxCats ? 'none' : 'block';
 }
 
-// Default Categories
-addCat('Botany','Chapter 1');
-addCat('Agronomy','Chap 2');
-addCat('Soil','Chap 3');
+addCat('Botany','Chapter 1', 7);
+addCat('Agronomy','Chap 2', 14);
+addCat('Soil','Chap 3', 7);
 
 // ── GENERATE ─────────────────────────────────────────────
 function generateTracker() {
@@ -485,14 +495,17 @@ function generateTracker() {
   document.querySelectorAll('.cat-row').forEach(r => {
     const n = r.querySelector('.cn').value.trim();
     const t = r.querySelector('.ct').value.trim();
-    if (n) cats.push({ name: n, target: t || '—' });
+    const d = parseInt(r.querySelector('.cd').value);
+    
+    // Assign custom target days; fallback to overall totalDays if left blank
+    if (n) cats.push({ name: n, target: t || '—', targetDays: isNaN(d) || d < 1 ? totalDays : d });
   });
   if (!cats.length) return toast('Add at least one category');
 
   const numWeeks = Math.ceil(totalDays / 7);
   const weeks = Array.from({ length: numWeeks }, (_, i) => ({
     wk: i + 1,
-    rows: cats.map(c => ({ section: c.name, target: c.target, days: Array(7).fill(false) }))
+    rows: cats.map((c, catIdx) => ({ section: c.name, target: c.target, catIdx: catIdx, days: Array(7).fill(false) }))
   }));
 
   data = { startDate: startVal, totalDays, categories: cats, weeks };
@@ -543,13 +556,11 @@ function buildCards() {
 
     const wPct = calcPct(w.rows.flatMap(r => r.days));
     
-    // Header
     const hdr = document.createElement('div');
     hdr.className = 'week-header';
     hdr.innerHTML = `<div class="wh-title">WEEK <span>${w.wk}</span></div><div class="wh-pct" id="wh-pct-${w.wk}">${wPct}%</div>`;
     sec.appendChild(hdr);
 
-    // Cards wrapper
     const cardsWrap = document.createElement('div');
     cardsWrap.className = 'cards-container';
 
@@ -558,14 +569,17 @@ function buildCards() {
       card.className = 'cat-card';
       const pct = calcPct(row.days);
       const chipClass = pct === 100 ? 'full' : pct > 0 ? '' : 'zero';
-
+      
       let html = `
         <div class="cc-top">
           <div>
             <div class="cc-name">${row.section}</div>
             <div class="cc-target">${row.target}</div>
           </div>
-          <div class="pct-chip ${chipClass}" id="chip-w${w.wk}-r${ri}">${pct}%</div>
+          <div class="cc-top-right">
+            <div class="rem-circle rem-circle-cat-${row.catIdx}" title="Remaining Custom Category Days">0</div>
+            <div class="pct-chip ${chipClass}" id="chip-w${w.wk}-r${ri}">${pct}%</div>
+          </div>
         </div>
         <div class="orange-box">
           <div class="ob-day">D1</div><div class="ob-day">D2</div><div class="ob-day">D3</div>
@@ -602,7 +616,7 @@ function toggle(wk, ri, di, btn) {
   btn.className = 'check-btn' + (done ? ' done' : '');
   btn.innerHTML = done ? '✓' : '·';
 
-  // Update card % chip
+  // Update card % chip (progress for this week out of 7)
   const pct = calcPct(w.rows[ri].days);
   const chip = document.getElementById(`chip-w${wk}-r${ri}`);
   chip.textContent = `${pct}%`;
@@ -617,36 +631,55 @@ function toggle(wk, ri, di, btn) {
 }
 
 function updateDash() {
+  // --- DASHBOARD CALENDAR TIME TRACKING ---
   const sd = new Date(data.startDate); sd.setHours(0,0,0,0);
   const today = new Date(); today.setHours(0,0,0,0);
+  
+  // Count how many real days have passed based on real-world time
   const elapsed = Math.max(0, Math.min(data.totalDays, Math.floor((today - sd) / 86400000)));
   
   document.getElementById('d-passed').textContent = elapsed;
+  // Dashboard overall remaining = Total overall days minus days passed in real life
   document.getElementById('d-left').textContent = Math.max(0, data.totalDays - elapsed);
 
-  const allD = data.weeks.flatMap(w => w.rows.flatMap(r => r.days));
-  const pct = calcPct(allD);
-  
-  document.getElementById('d-overall').textContent = pct + '%';
-  const arc = document.getElementById('ring-arc');
-  arc.style.strokeDashoffset = 201 - (pct / 100) * 201;
-
-  // Render Cat Progress
+  // --- CATEGORY CUSTOM TARGET TRACKING (Checkmarks based) ---
+  let totalTargets = 0;
+  let allCompleted = 0;
   const catDiv = document.getElementById('d-cats');
   catDiv.innerHTML = '';
-  data.categories.forEach((c, i) => {
-    const days = data.weeks.flatMap(w => w.rows.filter(r => r.section === c.name).flatMap(r => r.days));
-    const p = calcPct(days);
-    const col = colors[i % colors.length];
+
+  data.categories.forEach((cat, idx) => {
+    // Check how many days the user actually clicked the checkmark for this specific category
+    const completedDaysForCat = data.weeks.flatMap(w => w.rows.filter(r => r.catIdx === idx).flatMap(r => r.days)).filter(Boolean).length;
+    
+    totalTargets += cat.targetDays;
+    allCompleted += completedDaysForCat;
+
+    // Update ALL the small circles associated with this category to show: Custom Target - Completed Checks
+    const remainingCatDays = Math.max(0, cat.targetDays - completedDaysForCat);
+    document.querySelectorAll(`.rem-circle-cat-${idx}`).forEach(el => {
+      el.textContent = remainingCatDays;
+    });
+
+    // Render Progress Bars for each category
+    const p = Math.min(100, Math.round((completedDaysForCat / cat.targetDays) * 100)) || 0; 
+    const col = colors[idx % colors.length];
+    
     catDiv.innerHTML += `
       <div class="prog-item">
-        <span class="p-name">${c.name}</span>
+        <span class="p-name">${cat.name}</span>
         <div class="p-bar-wrap"><div class="p-bar" style="width:${p}%; background:${col}"></div></div>
         <span class="p-pct" style="color:${col}">${p}%</span>
       </div>`;
   });
 
-  // Render Week Progress
+  // Update Overall Ring based on custom target totals vs completed checks
+  const globalPct = Math.min(100, Math.round((allCompleted / totalTargets) * 100)) || 0;
+  document.getElementById('d-overall').textContent = globalPct + '%';
+  const arc = document.getElementById('ring-arc');
+  arc.style.strokeDashoffset = 201 - (globalPct / 100) * 201;
+
+  // Render Week Progress Bars
   const wDiv = document.getElementById('d-weeks');
   wDiv.innerHTML = '';
   data.weeks.forEach((w) => {
@@ -706,17 +739,17 @@ function toast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
-function save() { localStorage.setItem('strack2', JSON.stringify(data)); }
+function save() { localStorage.setItem('strack4', JSON.stringify(data)); } // Key updated
 function resetTracker() {
   if (!confirm('Clear all progress?')) return;
-  localStorage.removeItem('strack2'); data = null;
+  localStorage.removeItem('strack4'); data = null;
   document.getElementById('tracker-screen').style.display = 'none';
   document.getElementById('setup-screen').style.display = 'flex';
 }
 
 // ── INIT ─────────────────────────────────────────────────
 try {
-  const raw = localStorage.getItem('strack2'); // changed key to avoid conflict with old format
+  const raw = localStorage.getItem('strack4'); 
   if (raw) { data = JSON.parse(raw); render(); }
 } catch {}
 </script>
