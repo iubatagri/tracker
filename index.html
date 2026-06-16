@@ -304,7 +304,8 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
   user-select: none;
 }
 .check-btn.done { background: var(--done-bg); border-color: var(--done-border); color: var(--done-fg); }
-.check-btn:hover { border-color: var(--emerald); transform: scale(1.05); }
+.check-btn.blocked { background: #f1f5f9; border-color: #e2e8f0; color: #cbd5e1; cursor: not-allowed; opacity: 0.6; }
+.check-btn:not(.blocked):hover { border-color: var(--emerald); transform: scale(1.05); }
 
 @media (max-width: 640px) {
   .dash-grid { grid-template-columns: 1fr; }
@@ -516,6 +517,14 @@ function generateTracker() {
 let calViewDate = null;
 const colors = ['#2dd4bf', '#3b82f6', '#f97316', '#a855f7', '#ec4899', '#eab308'];
 
+function getCatProgress(catIdx) {
+  if (!data) return { checked: 0, target: 1, pct: 0 };
+  const target = data.categories[catIdx].targetDays;
+  const checked = data.weeks.flatMap(w => w.rows.find(r => r.catIdx === catIdx).days).filter(Boolean).length;
+  const pct = Math.min(100, Math.round((checked / target) * 100));
+  return { checked, target, pct };
+}
+
 function render() {
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('tracker-screen').style.display = 'flex';
@@ -567,8 +576,9 @@ function buildCards() {
     w.rows.forEach((row, ri) => {
       const card = document.createElement('div');
       card.className = 'cat-card';
-      const pct = calcPct(row.days);
-      const chipClass = pct === 100 ? 'full' : pct > 0 ? '' : 'zero';
+      
+      const prog = getCatProgress(row.catIdx);
+      const chipClass = prog.pct >= 100 ? 'full' : prog.pct > 0 ? '' : 'zero';
       
       let html = `
         <div class="cc-top">
@@ -578,7 +588,7 @@ function buildCards() {
           </div>
           <div class="cc-top-right">
             <div class="rem-circle rem-circle-cat-${row.catIdx}" title="Remaining Custom Category Days">0</div>
-            <div class="pct-chip ${chipClass}" id="chip-w${w.wk}-r${ri}">${pct}%</div>
+            <div class="pct-chip ${chipClass}" id="chip-w${w.wk}-cat${row.catIdx}">${prog.pct}%</div>
           </div>
         </div>
         <div class="orange-box">
@@ -593,9 +603,15 @@ function buildCards() {
       row.days.forEach((done, di) => {
         const wrap = document.createElement('div'); wrap.className = 'check-btn-wrap';
         const btn = document.createElement('div');
-        btn.className = 'check-btn' + (done ? ' done' : '');
+        
+        let btnClass = 'check-btn';
+        if (done) btnClass += ' done';
+        else if (prog.checked >= prog.target) btnClass += ' blocked';
+
+        btn.className = btnClass;
         btn.innerHTML = done ? '✓' : '·';
-        btn.onclick = () => toggle(w.wk, ri, di, btn);
+        btn.id = `btn-w${w.wk}-cat${row.catIdx}-d${di}`;
+        btn.onclick = () => toggle(w.wk, ri, di, row.catIdx);
         wrap.appendChild(btn);
         checksRow.appendChild(wrap);
       });
@@ -608,19 +624,49 @@ function buildCards() {
   });
 }
 
-function toggle(wk, ri, di, btn) {
-  const w = data.weeks.find(x => x.wk === wk);
-  w.rows[ri].days[di] = !w.rows[ri].days[di];
-  const done = w.rows[ri].days[di];
-  
-  btn.className = 'check-btn' + (done ? ' done' : '');
-  btn.innerHTML = done ? '✓' : '·';
+function updateCategoryUI(catIdx) {
+  const prog = getCatProgress(catIdx);
+  const chipClass = prog.pct >= 100 ? 'full' : prog.pct > 0 ? '' : 'zero';
 
-  // Update card % chip (progress for this week out of 7)
-  const pct = calcPct(w.rows[ri].days);
-  const chip = document.getElementById(`chip-w${wk}-r${ri}`);
-  chip.textContent = `${pct}%`;
-  chip.className = 'pct-chip ' + (pct === 100 ? 'full' : pct > 0 ? '' : 'zero');
+  // Update chips and buttons for this category across all weeks
+  data.weeks.forEach(w => {
+    const chip = document.getElementById(`chip-w${w.wk}-cat${catIdx}`);
+    if (chip) {
+      chip.textContent = `${prog.pct}%`;
+      chip.className = 'pct-chip ' + chipClass;
+    }
+    
+    const row = w.rows.find(r => r.catIdx === catIdx);
+    if (row) {
+      row.days.forEach((done, di) => {
+        const btn = document.getElementById(`btn-w${w.wk}-cat${catIdx}-d${di}`);
+        if (btn) {
+          let btnClass = 'check-btn';
+          if (done) btnClass += ' done';
+          else if (prog.checked >= prog.target) btnClass += ' blocked';
+          btn.className = btnClass;
+          btn.innerHTML = done ? '✓' : '·';
+        }
+      });
+    }
+  });
+}
+
+function toggle(wk, ri, di, catIdx) {
+  const w = data.weeks.find(x => x.wk === wk);
+  const isDone = w.rows[ri].days[di];
+  const progBefore = getCatProgress(catIdx);
+  
+  // Prevent selecting new days if target is already reached
+  if (!isDone && progBefore.checked >= progBefore.target) {
+    toast(`Target of ${progBefore.target} days reached for this category!`);
+    return;
+  }
+
+  w.rows[ri].days[di] = !isDone;
+  
+  // Update category-specific UI (chips & blocks)
+  updateCategoryUI(catIdx);
 
   // Update week header %
   const wPct = calcPct(w.rows.flatMap(r => r.days));
@@ -739,7 +785,7 @@ function toast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
-function save() { localStorage.setItem('strack4', JSON.stringify(data)); } // Key updated
+function save() { localStorage.setItem('strack4', JSON.stringify(data)); } 
 function resetTracker() {
   if (!confirm('Clear all progress?')) return;
   localStorage.removeItem('strack4'); data = null;
