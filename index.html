@@ -7,207 +7,289 @@
 <title>Study Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
+/* ─── DESIGN TOKENS ─── */
 :root {
-  --dash-bg:  #151b2b;
+  --dash-bg:    #151b2b;
   --dash-panel: #1b2438;
-  --body-bg:  #f3f4f6;
-  --card-bg:  #ffffff;
-  --emerald:  #2dd4bf;
-  --emerald2: #14b8a6;
-  --blue:     #3b82f6;
-  --orange:   #f97316;
-  --yellow:   #fde047;
-  --yellow-text: #854d0e;
-  --purple:   #a855f7;
-  --text-main: #1f2937;
-  --text-mut:  #6b7280;
-  --done-bg:  #dcfce7;
-  --done-fg:  #16a34a;
-  --done-border: #86efac;
-  --archived-bg: #f8fafc;
+  --body-bg:    #f3f4f6;
+  --card-bg:    #ffffff;
+  --emerald:    #2dd4bf;
+  --blue:       #3b82f6;
+  --orange:     #f97316;
+  --yellow:     #fde047;
+  --yellow-text:#854d0e;
+  --purple:     #a855f7;
+  --red:        #ef4444;
+  --text-main:  #1f2937;
+  --text-mut:   #6b7280;
+  --done-bg:    #dcfce7;
+  --done-fg:    #16a34a;
+  --done-border:#86efac;
   --mono: 'JetBrains Mono', monospace;
   --sans: 'Inter', sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--sans); background: var(--dash-bg); color: #fff; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
+/* ─── AUTH SCREEN ─── */
+#auth-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.auth-shell { width: 100%; max-width: 420px; }
+.auth-logo { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.auth-logo span { color: var(--emerald); }
+.auth-tagline { font-size: 0.88rem; color: rgba(255,255,255,0.5); margin-bottom: 36px; line-height: 1.6; }
+.auth-card {
+  background: var(--dash-panel); border-radius: 20px; padding: 32px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px;
+}
+.auth-card-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
+.auth-card-sub   { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-top: -10px; }
+.auth-field { display: flex; flex-direction: column; gap: 7px; }
+.auth-field label { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; }
+.auth-input {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 13px 14px; font-family: var(--sans); font-size: 0.95rem;
+  color: #fff; width: 100%; outline: none; transition: border-color 0.2s, background 0.2s;
+  letter-spacing: 0.03em;
+}
+.auth-input:focus { border-color: var(--blue); background: rgba(59,130,246,0.08); }
+.auth-input.otp-input { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; letter-spacing: 0.3em; text-align: center; }
+.auth-btn {
+  padding: 15px; border-radius: 12px; border: none; background: var(--blue); color: #fff;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+}
+.auth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.auth-btn.secondary { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); box-shadow: none; }
+.auth-btn.secondary:hover { background: rgba(255,255,255,0.12); }
+.auth-divider { height: 1px; background: rgba(255,255,255,0.08); }
+.auth-hint { font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.5; }
+.auth-hint a { color: var(--emerald); text-decoration: none; cursor: pointer; }
+.auth-hint a:hover { text-decoration: underline; }
+.auth-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; color: #fca5a5; display: none; }
+.auth-error.show { display: block; }
+.otp-timer { font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: center; font-family: var(--mono); }
+.otp-timer span { color: var(--emerald); }
+
+/* Spinner */
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ─── SETUP SCREEN ─── */
-#setup-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
-.setup-shell { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 0; }
-.setup-headline { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 6px; }
+#setup-screen { min-height: 100vh; display: none; align-items: center; justify-content: center; padding: 24px; }
+.setup-shell { width: 100%; max-width: 580px; }
+.setup-headline { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
 .setup-sub { font-size: 0.88rem; color: rgba(255,255,255,0.6); margin-bottom: 32px; line-height: 1.6; }
-.setup-card { background: var(--dash-panel); border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.setup-card { background: var(--dash-panel); border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 .field-group { display: flex; flex-direction: column; gap: 8px; }
-.field-group label { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.05em; }
+.field-group label { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; }
 .preset-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .preset-btn { padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; cursor: pointer; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
 .preset-btn:hover { background: rgba(255,255,255,0.1); }
-.preset-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
-input[type="date"], input[type="number"], input[type="text"] { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 14px; font-family: var(--sans); font-size: 0.95rem; color: #fff; width: 100%; transition: 0.2s; outline: none; color-scheme: dark; }
-input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
+.preset-btn.active { background: var(--blue); border-color: var(--blue); }
+.f-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; font-family: var(--sans); font-size: 0.95rem; color: #fff; width: 100%; outline: none; transition: 0.2s; color-scheme: dark; }
+.f-input:focus { border-color: var(--blue); background: rgba(59,130,246,0.08); }
 .divider { height: 1px; background: rgba(255,255,255,0.08); }
 .cat-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.cat-label-row span { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; }
-.cat-label-row .cat-count { font-family: var(--mono); color: rgba(255,255,255,0.4); }
-#category-list { display: flex; flex-direction: column; gap: 10px; }
+.cat-label-row span { font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+.cat-count { font-family: var(--mono); color: rgba(255,255,255,0.35) !important; }
+#category-list { display: flex; flex-direction: column; gap: 9px; }
 .cat-row { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 8px; }
-.rm-btn { width: 42px; height: 42px; border-radius: 10px; border: none; background: rgba(239,68,68,0.15); color: #ef4444; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
-.rm-btn:hover { background: #ef4444; color: #fff; }
-.add-cat { padding: 12px; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.7); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.add-cat:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); color: #fff; }
+.rm-btn { width: 42px; height: 42px; border-radius: 10px; border: none; background: rgba(239,68,68,0.12); color: var(--red); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+.rm-btn:hover { background: var(--red); color: #fff; }
+.add-cat { padding: 12px; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.18); background: transparent; color: rgba(255,255,255,0.65); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.add-cat:hover { background: rgba(255,255,255,0.05); color: #fff; }
 .gen-btn { padding: 16px; border-radius: 12px; border: none; background: var(--blue); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; box-shadow: 0 4px 14px rgba(59,130,246,0.4); }
-.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.6); }
+.gen-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.55); }
 
 /* ─── TRACKER SCREEN ─── */
 #tracker-screen { display: none; flex-direction: column; min-height: 100vh; background: var(--body-bg); }
 .dashboard-area { background: var(--dash-bg); color: #fff; padding: 24px 20px 30px; border-bottom: 1px solid #1e293b; }
 .t-header-top { display: flex; justify-content: space-between; align-items: flex-start; max-width: 800px; margin: 0 auto 24px; }
 .t-header-left { display: flex; align-items: center; gap: 14px; }
-.t-icon { width: 48px; height: 48px; background: rgba(45,212,191,0.15); color: var(--emerald); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-.t-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
-.t-started { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-weight: 500; }
+.t-icon { width: 48px; height: 48px; background: rgba(45,212,191,0.12); color: var(--emerald); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.t-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 3px; }
+.t-started { font-size: 0.82rem; color: rgba(255,255,255,0.45); font-weight: 500; }
 .header-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.reset-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.15s; }
-.reset-btn:hover { background: rgba(255,255,255,0.1); }
-.extend-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(168,85,247,0.4); background: rgba(168,85,247,0.1); color: var(--purple); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.15s; }
-.extend-btn:hover { background: rgba(168,85,247,0.2); }
-
-/* Dashboard Panels Grid */
+.hdr-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: 0.15s; }
+.hdr-btn:hover { background: rgba(255,255,255,0.1); }
+.hdr-btn.accent { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.1); color: var(--purple); }
+.hdr-btn.accent:hover { background: rgba(168,85,247,0.2); }
 .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto; }
 .dash-box { padding: 20px; background: var(--dash-panel); border-radius: 16px; }
 .overall-row { display: flex; gap: 24px; align-items: center; }
 .overall-left { display: flex; align-items: center; gap: 16px; }
-.ring-wrap { position: relative; width: 72px; height: 72px; }
+.ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
 .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
-.ring-fill { fill: none; stroke: var(--emerald); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 201; stroke-dashoffset: 201; transition: 0.5s; }
-.ring-lbl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; color: #fff; }
-.overall-text { display: flex; flex-direction: column; }
-.o-lbl { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.1em; }
-.days-stats { display: flex; flex-direction: column; gap: 16px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 24px; }
+.ring-bg   { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+.ring-fill { fill: none; stroke: var(--emerald); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 201; stroke-dashoffset: 201; transition: stroke-dashoffset 0.5s; }
+.ring-lbl  { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 700; }
+.o-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.1em; margin-top: 2px; }
+.days-stats { display: flex; flex-direction: column; gap: 16px; border-left: 1px solid rgba(255,255,255,0.08); padding-left: 22px; }
 .day-stat { display: flex; align-items: center; gap: 10px; }
-.d-num { font-size: 1.5rem; font-weight: 700; font-family: var(--mono); color: var(--emerald); }
-.d-text { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; line-height: 1.3; }
-.prog-title { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 14px; text-transform: uppercase; }
-.prog-list { display: flex; flex-direction: column; gap: 14px; }
-.prog-item { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; gap: 12px; }
-.p-name { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-bar-wrap { height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
-.p-bar { height: 100%; border-radius: 4px; transition: 0.4s; }
-.p-pct { font-size: 0.85rem; font-family: var(--mono); color: var(--blue); font-weight: 600; text-align: right; }
+.d-num  { font-size: 1.5rem; font-weight: 700; font-family: var(--mono); color: var(--emerald); }
+.d-text { font-size: 0.72rem; color: rgba(255,255,255,0.45); font-weight: 600; text-transform: uppercase; line-height: 1.35; }
+.prog-title { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 14px; text-transform: uppercase; }
+.prog-list { display: flex; flex-direction: column; gap: 13px; }
+.prog-item { display: grid; grid-template-columns: 80px 1fr 34px; align-items: center; gap: 10px; }
+.p-name { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-bar-wrap { height: 5px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+.p-bar { height: 100%; border-radius: 4px; transition: width 0.4s; }
+.p-pct { font-size: 0.82rem; font-family: var(--mono); font-weight: 600; text-align: right; }
 .mc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.mc-month { font-size: 0.85rem; font-weight: 700; color: #fff; }
+.mc-month { font-size: 0.85rem; font-weight: 700; }
 .mc-nav { display: flex; gap: 4px; }
-.mc-nav button { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; }
-.mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-.mc-dow { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.3); padding-bottom: 4px; }
-.mc-cell { font-size: 0.75rem; font-family: var(--mono); padding: 4px 0; border-radius: 4px; }
-.mc-cell.empty { background: transparent; }
+.mc-nav button { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; cursor: pointer; transition: 0.15s; }
+.mc-nav button:hover { background: rgba(255,255,255,0.15); }
+.mc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+.mc-dow  { font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.28); padding-bottom: 4px; }
+.mc-cell { font-size: 0.72rem; font-family: var(--mono); padding: 4px 0; border-radius: 4px; }
 .mc-cell.no-plan { color: rgba(255,255,255,0.1); }
-.mc-cell.future { color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.03); }
-.mc-cell.past { color: var(--emerald); background: rgba(45,212,191,0.1); }
-.mc-cell.today { background: var(--orange); color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(249,115,22,0.4); }
+.mc-cell.future  { color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.03); }
+.mc-cell.past    { color: var(--emerald); background: rgba(45,212,191,0.1); }
+.mc-cell.today   { background: var(--orange); color: #fff; font-weight: 700; box-shadow: 0 0 8px rgba(249,115,22,0.4); }
 
-/* Sticky Nav Row */
-.nav-row { background: var(--card-bg); padding: 16px 20px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 12px; }
-.nav-lbl { font-size: 0.8rem; font-weight: 700; color: var(--text-mut); letter-spacing: 0.05em; text-transform: uppercase; }
-.nav-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+/* Sticky Nav */
+.nav-row { background: var(--card-bg); padding: 14px 20px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; }
+.nav-lbl { font-size: 0.78rem; font-weight: 700; color: var(--text-mut); text-transform: uppercase; white-space: nowrap; }
+.nav-pills { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
 .nav-pills::-webkit-scrollbar { height: 0; }
-.nav-btn { padding: 6px 14px; border-radius: 8px; border: none; background: #f1f5f9; color: var(--text-mut); font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--mono); }
+.nav-btn { padding: 5px 13px; border-radius: 8px; border: none; background: #f1f5f9; color: var(--text-mut); font-size: 0.83rem; font-weight: 600; cursor: pointer; font-family: var(--mono); transition: 0.15s; }
 .nav-btn.active { background: var(--dash-bg); color: var(--emerald); }
 
-/* Main Tracker Area */
-.tracker-content { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; color: var(--text-main); width: 100%; }
-.week-section { margin-bottom: 32px; }
-.week-header { background: var(--dash-panel); color: #fff; border-radius: 12px 12px 0 0; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
-.wh-title { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
-.wh-title span { color: var(--emerald); font-family: var(--mono); font-size: 1.1rem; margin-left: 6px; }
-.wh-pct { color: var(--emerald); font-family: var(--mono); font-weight: 700; font-size: 1rem; }
+/* Tracker Content */
+.tracker-content { max-width: 800px; margin: 0 auto; padding: 24px 20px 50px; color: var(--text-main); width: 100%; }
+.week-section { margin-bottom: 30px; }
+.week-header { background: var(--dash-panel); color: #fff; border-radius: 12px 12px 0 0; padding: 13px 20px; display: flex; justify-content: space-between; align-items: center; }
+.wh-title { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+.wh-title span { color: var(--emerald); font-family: var(--mono); font-size: 1.05rem; margin-left: 6px; }
+.wh-pct { color: var(--emerald); font-family: var(--mono); font-weight: 700; }
 .cards-container { background: #e2e8f0; padding: 1px; border-radius: 0 0 12px 12px; display: flex; flex-direction: column; gap: 1px; }
-.cat-card { background: var(--card-bg); padding: 20px; }
+.cat-card { background: var(--card-bg); padding: 18px 20px; }
 .cat-card:last-child { border-radius: 0 0 11px 11px; }
 .cc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-.cc-name { font-size: 1.1rem; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
-.cc-target { font-size: 0.85rem; color: var(--text-mut); font-weight: 500; }
+.cc-name   { font-size: 1.05rem; font-weight: 700; color: var(--blue); margin-bottom: 3px; }
+.cc-target { font-size: 0.82rem; color: var(--text-mut); }
 .cc-top-right { display: flex; align-items: center; gap: 8px; }
-.rem-circle { width: 32px; height: 32px; border-radius: 50%; background: rgba(59,130,246,0.1); color: var(--blue); font-family: var(--mono); font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59,130,246,0.3); flex-shrink: 0; }
-.pct-chip { padding: 4px 12px; border-radius: 99px; font-family: var(--mono); font-size: 0.85rem; font-weight: 700; background: #fef08a; color: var(--yellow-text); border: 1px solid #fde047; }
+.rem-circle { width: 30px; height: 30px; border-radius: 50%; background: rgba(59,130,246,0.08); color: var(--blue); font-family: var(--mono); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59,130,246,0.25); flex-shrink: 0; }
+.pct-chip { padding: 3px 11px; border-radius: 99px; font-family: var(--mono); font-size: 0.82rem; font-weight: 700; background: #fef9c3; color: var(--yellow-text); border: 1px solid #fde047; }
 .pct-chip.full { background: var(--done-bg); color: var(--done-fg); border-color: var(--done-border); }
 .pct-chip.zero { background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
-.orange-box { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; border: 3px solid var(--orange); border-radius: 8px; padding: 6px 8px; margin-bottom: 10px; }
-.ob-day { text-align: center; font-size: 0.8rem; font-weight: 700; color: var(--text-mut); }
-.checks-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 0 8px; }
+.orange-box { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; border: 2.5px solid var(--orange); border-radius: 8px; padding: 5px 7px; margin-bottom: 9px; }
+.ob-day { text-align: center; font-size: 0.78rem; font-weight: 700; color: var(--text-mut); }
+.checks-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 0 7px; }
 .check-btn-wrap { display: flex; justify-content: center; }
-.check-btn { width: 100%; aspect-ratio: 1; max-width: 44px; border-radius: 10px; border: 2px solid #e5e7eb; background: #fff; color: transparent; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: 0.15s; user-select: none; }
-.check-btn.done { background: var(--done-bg); border-color: var(--done-border); color: var(--done-fg); }
+.check-btn { width: 100%; aspect-ratio: 1; max-width: 44px; border-radius: 9px; border: 2px solid #e5e7eb; background: #fff; color: transparent; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: border-color 0.12s, transform 0.1s; user-select: none; }
+.check-btn.done    { background: var(--done-bg); border-color: var(--done-border); color: var(--done-fg); }
 .check-btn.blocked { background: #f1f5f9; border-color: #e2e8f0; color: #cbd5e1; cursor: not-allowed; opacity: 0.6; }
-.check-btn:not(.blocked):hover { border-color: var(--emerald); transform: scale(1.05); }
+.check-btn:not(.blocked):hover { border-color: var(--emerald); transform: scale(1.06); }
 
-/* ─── ARCHIVED CATEGORIES ─── */
-.archived-section { margin-top: 8px; max-width: 800px; margin: 8px auto 0; padding: 0 20px; }
-.archived-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--card-bg); border-radius: 10px; cursor: pointer; border: 1px solid #e5e7eb; color: var(--text-mut); font-size: 0.85rem; font-weight: 600; user-select: none; transition: 0.15s; }
+/* ─── ARCHIVED ─── */
+.archived-section { max-width: 800px; margin: 0 auto; padding: 0 20px 40px; }
+.archived-toggle { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--card-bg); border-radius: 10px; cursor: pointer; border: 1px solid #e5e7eb; color: var(--text-mut); font-size: 0.83rem; font-weight: 600; user-select: none; transition: 0.15s; }
 .archived-toggle:hover { background: #f8fafc; }
-.archived-toggle .arc-badge { background: #e0e7ff; color: #4338ca; border-radius: 99px; padding: 2px 10px; font-family: var(--mono); font-size: 0.8rem; }
-.archived-toggle .arc-arrow { margin-left: auto; transition: 0.2s; }
+.arc-badge { background: #ede9fe; color: #6d28d9; border-radius: 99px; padding: 1px 9px; font-family: var(--mono); font-size: 0.78rem; }
+.arc-arrow { margin-left: auto; transition: transform 0.2s; }
 .archived-toggle.open .arc-arrow { transform: rotate(180deg); }
 .archived-list { display: none; flex-direction: column; gap: 1px; background: #e2e8f0; border-radius: 0 0 10px 10px; overflow: hidden; }
 .archived-list.open { display: flex; }
-.archived-card { background: var(--archived-bg); padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
-.arc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.arc-info { flex: 1; }
-.arc-name { font-size: 0.95rem; font-weight: 700; color: var(--text-main); }
-.arc-meta { font-size: 0.8rem; color: var(--text-mut); margin-top: 2px; }
-.arc-pct { font-family: var(--mono); font-size: 0.9rem; font-weight: 700; color: var(--done-fg); background: var(--done-bg); border: 1px solid var(--done-border); border-radius: 99px; padding: 3px 12px; }
+.archived-card { background: #f8fafc; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+.arc-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.arc-info { flex: 1; min-width: 0; }
+.arc-name { font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+.arc-meta { font-size: 0.78rem; color: var(--text-mut); margin-top: 2px; }
+.arc-pct  { font-family: var(--mono); font-size: 0.85rem; font-weight: 700; color: var(--done-fg); background: var(--done-bg); border: 1px solid var(--done-border); border-radius: 99px; padding: 3px 11px; white-space: nowrap; }
 
 /* ─── EXTEND MODAL ─── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
 .modal-overlay.open { display: flex; }
-.modal-box { background: var(--dash-panel); border-radius: 20px; padding: 30px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.modal-title { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
-.modal-sub { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 24px; line-height: 1.5; }
+.modal-box { background: var(--dash-panel); border-radius: 20px; padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+.modal-title { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.modal-sub   { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-bottom: 22px; line-height: 1.5; }
+.modal-sec-label { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
 .modal-section { margin-bottom: 20px; }
-.modal-section-label { font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
-.modal-days-row { display: flex; gap: 10px; align-items: center; }
-.modal-days-row input { flex: 1; }
-.modal-days-hint { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 6px; }
+.cur-cats-box { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cur-cat-row  { display: flex; align-items: center; gap: 10px; }
+.cur-cat-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cur-cat-name { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.8); flex: 1; }
+.cur-cat-st   { font-size: 0.75rem; font-family: var(--mono); }
+.cur-cat-st.done    { color: var(--emerald); }
+.cur-cat-st.ongoing { color: var(--yellow); }
+.modal-days-hint { font-size: 0.78rem; color: rgba(255,255,255,0.35); margin-top: 6px; }
 .modal-new-cats { display: flex; flex-direction: column; gap: 8px; }
-.modal-cat-row { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 8px; }
-.modal-add-cat { padding: 10px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.modal-add-cat { padding: 10px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.18); background: transparent; color: rgba(255,255,255,0.65); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 8px; }
 .modal-add-cat:hover { background: rgba(255,255,255,0.05); color: #fff; }
-.modal-btns { display: flex; gap: 10px; margin-top: 24px; }
-.modal-cancel { flex: 1; padding: 13px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
-.modal-apply { flex: 2; padding: 13px; border-radius: 10px; border: none; background: var(--purple); color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(168,85,247,0.3); }
+.modal-btns { display: flex; gap: 10px; margin-top: 22px; }
+.modal-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75); font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+.modal-cancel:hover { background: rgba(255,255,255,0.1); }
+.modal-apply  { flex: 2; padding: 12px; border-radius: 10px; border: none; background: var(--purple); color: #fff; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
 .modal-apply:hover { background: #9333ea; }
-.current-cats-info { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-.cur-cat-row { display: flex; align-items: center; gap: 10px; }
-.cur-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.cur-cat-name { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.8); flex: 1; }
-.cur-cat-status { font-size: 0.78rem; font-family: var(--mono); }
-.cur-cat-status.done { color: var(--emerald); }
-.cur-cat-status.ongoing { color: var(--yellow); }
 
-.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dash-panel); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 300; }
+/* ─── SAVE INDICATOR ─── */
+.save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--emerald); display: inline-block; margin-right: 6px; opacity: 0; transition: opacity 0.3s; }
+.save-dot.pulse { opacity: 1; animation: fadeOut 1.5s forwards; }
+@keyframes fadeOut { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+/* ─── TOAST ─── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px); background: #0f172a; color: #fff; padding: 11px 22px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 400; border: 1px solid rgba(255,255,255,0.08); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ─── ARCHIVED LABEL on category card ─── */
-.cat-card.archived-cat { opacity: 0.6; }
-.cat-card.archived-cat .cc-name { color: var(--text-mut); }
-
 @media (max-width: 640px) {
-  .dash-grid { grid-template-columns: 1fr; }
-  .setup-card { padding: 20px; }
+  .dash-grid   { grid-template-columns: 1fr; }
+  .setup-card  { padding: 20px; }
+  .auth-card   { padding: 24px; }
   .cat-row, .modal-cat-row { grid-template-columns: 1fr 1fr; }
   .cat-row .cd, .modal-cat-row .cd { grid-column: span 2; }
   .cat-row .rm-btn, .modal-cat-row .rm-btn { grid-column: span 2; width: 100%; }
-  .orange-box { padding: 4px; gap: 2px; }
-  .checks-row { padding: 0 4px; gap: 2px; }
-  .check-btn { border-width: 1px; font-size: 1rem; border-radius: 6px; }
+  .orange-box  { padding: 4px; gap: 2px; }
+  .checks-row  { padding: 0 4px; gap: 2px; }
+  .check-btn   { border-width: 1px; font-size: 1rem; border-radius: 6px; }
+  .header-btns { gap: 6px; }
+  .hdr-btn     { padding: 7px 10px; font-size: 0.78rem; }
 }
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
+<!-- ════════ AUTH SCREEN ════════ -->
+<div id="auth-screen">
+  <div class="auth-shell">
+    <div class="auth-logo">Study<span>Track</span></div>
+    <div class="auth-tagline">Your planner, accessible from any device.<br>Sign in with your email — no password needed.</div>
+
+    <!-- Step 1: Email entry -->
+    <div class="auth-card" id="auth-step-email">
+      <div class="auth-card-title">Sign in</div>
+      <div class="auth-card-sub">Enter your email. We'll send you a 6-digit code.</div>
+      <div class="auth-field">
+        <label>Email address</label>
+        <input class="auth-input" type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="auth-error" id="email-error"></div>
+      <button class="auth-btn" id="send-otp-btn" onclick="sendOTP()">Send Code</button>
+      <div class="auth-hint">No account needed — first sign-in creates your profile.</div>
+    </div>
+
+    <!-- Step 2: OTP entry -->
+    <div class="auth-card" id="auth-step-otp" style="display:none;">
+      <div class="auth-card-title">Check your email</div>
+      <div class="auth-card-sub" id="otp-sent-to">We sent a 6-digit code to your email.</div>
+      <div class="auth-field">
+        <label>6-digit code</label>
+        <input class="auth-input otp-input" type="text" id="auth-otp" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      </div>
+      <div class="otp-timer" id="otp-timer">Code expires in <span id="otp-countdown">10:00</span></div>
+      <div class="auth-error" id="otp-error"></div>
+      <button class="auth-btn" id="verify-otp-btn" onclick="verifyOTP()">Verify & Sign In</button>
+      <button class="auth-btn secondary" onclick="backToEmail()" style="margin-top:-6px;">← Use a different email</button>
+      <div class="auth-hint"><a onclick="resendOTP()">Resend code</a> if you didn't receive it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SETUP SCREEN ════════ -->
 <div id="setup-screen">
   <div class="setup-shell">
     <div class="setup-headline">Build your plan.</div>
@@ -215,7 +297,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
     <div class="setup-card">
       <div class="field-group">
         <label>Start Date</label>
-        <input type="date" id="start-date">
+        <input type="date" id="start-date" class="f-input">
       </div>
       <div class="field-group">
         <label>Overall Duration (Days)</label>
@@ -226,7 +308,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
           <button class="preset-btn" data-days="90">90d</button>
           <button class="preset-btn active" data-days="custom">Custom</button>
         </div>
-        <input type="number" id="total-days" min="7" max="730" placeholder="Total overall days...">
+        <input type="number" id="total-days" class="f-input" min="7" max="730" placeholder="Total days...">
       </div>
       <div class="divider"></div>
       <div>
@@ -242,7 +324,7 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
   </div>
 </div>
 
-<!-- TRACKER SCREEN -->
+<!-- ════════ TRACKER SCREEN ════════ -->
 <div id="tracker-screen">
   <div class="dashboard-area">
     <div class="t-header-top">
@@ -254,11 +336,11 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
         </div>
       </div>
       <div class="header-btns">
-        <button class="extend-btn" onclick="openExtendModal()">＋ Extend Plan</button>
-        <button class="reset-btn" onclick="resetTracker()">↩ New</button>
+        <button class="hdr-btn accent" onclick="openExtendModal()">＋ Extend</button>
+        <button class="hdr-btn" onclick="resetTracker()">↩ New</button>
+        <button class="hdr-btn" onclick="signOut()" title="Sign out">⏻</button>
       </div>
     </div>
-
     <div class="dash-grid">
       <div class="dash-box">
         <div class="overall-row">
@@ -270,14 +352,14 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
               </svg>
               <span class="ring-lbl" id="d-overall">0%</span>
             </div>
-            <div class="overall-text"><span class="o-lbl">OVERALL</span></div>
+            <div><span class="o-lbl">OVERALL</span></div>
           </div>
           <div class="days-stats">
             <div class="day-stat"><span class="d-num" id="d-passed">0</span><span class="d-text">Days<br>Passed</span></div>
             <div class="day-stat"><span class="d-num" id="d-left">0</span><span class="d-text" style="color:var(--text-mut)">Remaining</span></div>
           </div>
         </div>
-        <div style="margin-top:24px;">
+        <div style="margin-top:22px;">
           <div class="prog-title">Active Categories</div>
           <div class="prog-list" id="d-cats"></div>
         </div>
@@ -290,9 +372,9 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
             <button id="mc-next">&#8250;</button>
           </div>
         </div>
-        <div class="mc-grid" id="mc-grid" style="margin-bottom:20px;"></div>
+        <div class="mc-grid" id="mc-grid" style="margin-bottom:18px;"></div>
         <div class="prog-title">Weekly Breakdown</div>
-        <div class="prog-list" id="d-weeks" style="max-height:110px;overflow-y:auto;padding-right:6px;"></div>
+        <div class="prog-list" id="d-weeks" style="max-height:110px;overflow-y:auto;padding-right:4px;"></div>
       </div>
     </div>
   </div>
@@ -300,12 +382,12 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
   <div class="nav-row">
     <span class="nav-lbl">WEEK</span>
     <div class="nav-pills" id="nav-pills"></div>
+    <span class="save-dot" id="save-dot" style="margin-left:auto;"></span>
   </div>
 
   <div class="tracker-content" id="tracker-content"></div>
 
-  <!-- ARCHIVED CATEGORIES SECTION -->
-  <div class="archived-section" id="archived-section" style="display:none; padding-bottom:40px;">
+  <div class="archived-section" id="archived-section" style="display:none;">
     <div class="archived-toggle" id="archived-toggle" onclick="toggleArchived()">
       <span>✔ Completed Categories</span>
       <span class="arc-badge" id="arc-badge">0</span>
@@ -315,108 +397,360 @@ input:focus { border-color: var(--blue); background: rgba(59,130,246,0.1); }
   </div>
 </div>
 
-<!-- EXTEND MODAL -->
+<!-- ════════ EXTEND MODAL ════════ -->
 <div class="modal-overlay" id="extend-modal">
   <div class="modal-box">
     <div class="modal-title">Extend Your Plan</div>
-    <div class="modal-sub">Add more days to your plan and/or new categories. Past completed categories are preserved in memory.</div>
-
+    <div class="modal-sub">Add more days and/or new categories. Completed categories are preserved in memory.</div>
     <div class="modal-section">
-      <div class="modal-section-label">Current Categories</div>
-      <div class="current-cats-info" id="modal-cur-cats"></div>
+      <div class="modal-sec-label">Current Categories</div>
+      <div class="cur-cats-box" id="modal-cur-cats"></div>
     </div>
-
     <div class="divider" style="margin-bottom:20px;"></div>
-
     <div class="modal-section">
-      <div class="modal-section-label">Add Days to Plan</div>
-      <div class="modal-days-row">
-        <input type="number" id="ext-days" min="0" placeholder="Extra days to add (0 = no change)" style="color-scheme:dark;">
-      </div>
+      <div class="modal-sec-label">Add Days to Plan</div>
+      <input type="number" id="ext-days" class="f-input" min="0" placeholder="Extra days to add (0 = no change)" style="color-scheme:dark;">
       <div class="modal-days-hint" id="ext-days-hint">Current total: — days</div>
     </div>
-
     <div class="modal-section">
-      <div class="modal-section-label">Add New Categories</div>
+      <div class="modal-sec-label">Add New Categories</div>
       <div class="modal-new-cats" id="modal-new-cats"></div>
-      <button class="modal-add-cat" id="modal-add-cat-btn" style="margin-top:8px;">＋ Add another category</button>
+      <button class="modal-add-cat" id="modal-add-cat-btn">＋ Add category</button>
     </div>
-
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeExtendModal()">Cancel</button>
-      <button class="modal-apply" onclick="applyExtension()">Apply Changes →</button>
+      <button class="modal-apply" onclick="applyExtension()">Apply →</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-let data = null;
-const STORAGE_KEY = 'strack5';
-const maxCats = 20;
-const colors = ['#2dd4bf','#3b82f6','#f97316','#a855f7','#ec4899','#eab308','#10b981','#ef4444','#06b6d4','#f59e0b','#8b5cf6','#84cc16'];
+<!-- ════════════════════════════════════════════════════════
+     FIREBASE SDK  (v10 modular, loaded from CDN)
+     ════════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, signInAnonymously,
+         signOut as fbSignOut }                 from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-// ── SETUP UI ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+//  🔧 PASTE YOUR FIREBASE CONFIG OBJECT HERE
+//  (from Firebase Console → Project Settings → Your apps)
+// ══════════════════════════════════════════════════════════
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCB5I_GKLyKdRBaiXF4cybwZkI1BztfKHE",
+  authDomain: "planner-48642.firebaseapp.com",
+  projectId: "planner-48642",
+  storageBucket: "planner-48642.firebasestorage.app",
+  messagingSenderId: "930312918035",
+  appId: "1:930312918035:web:00c349595f7c8891c75be6",
+  measurementId: "G-ZMT35EXY38"
+};
+// ══════════════════════════════════════════════════════════
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── OTP State ──────────────────────────────────────────────
+let currentEmail = '';
+let otpHash      = '';    // SHA-256 hex of salt+otp stored locally
+let otpSalt      = '';
+let otpExpiry    = 0;
+let timerInterval= null;
+
+// ── Helpers ────────────────────────────────────────────────
+async function sha256(message) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function generateSalt() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function setError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.toggle('show', !!msg);
+}
+
+function startCountdown(seconds) {
+  clearInterval(timerInterval);
+  let remaining = seconds;
+  const el = document.getElementById('otp-countdown');
+  timerInterval = setInterval(() => {
+    remaining--;
+    const m = String(Math.floor(remaining / 60)).padStart(2,'0');
+    const s = String(remaining % 60).padStart(2,'0');
+    el.textContent = `${m}:${s}`;
+    if (remaining <= 0) { clearInterval(timerInterval); el.textContent = 'expired'; }
+  }, 1000);
+}
+
+// ── OTP Send ───────────────────────────────────────────────
+window.sendOTP = async function() {
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return setError('email-error', 'Please enter a valid email address.');
+  }
+  setError('email-error', '');
+  const btn = document.getElementById('send-otp-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending…';
+
+  const otp  = generateOTP();
+  const salt = generateSalt();
+  const hash = await sha256(salt + otp);
+
+  otpSalt   = salt;
+  otpHash   = hash;
+  otpExpiry = Date.now() + 10 * 60 * 1000;   // 10 minutes
+  currentEmail = email;
+
+  // Store hash+salt in Firestore (NOT the raw OTP — server never sees it)
+  try {
+    await setDoc(doc(db, 'otp_requests', email.replace(/[.@]/g,'_')), {
+      hash, salt, expiry: otpExpiry, attempts: 0
+    });
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Send Code';
+    return setError('email-error', 'Could not reach the server. Check your internet connection.');
+  }
+
+  // Send OTP via EmailJS (free — see setup guide below)
+  try {
+    await emailjs.send('SERVICE_ID', 'TEMPLATE_ID', {
+      to_email: email,
+      otp_code: otp,
+      expiry_min: 10
+    }, 'PUBLIC_KEY');
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Send Code';
+    return setError('email-error', 'Failed to send email. Please try again.');
+  }
+
+  btn.disabled = false; btn.textContent = 'Send Code';
+  document.getElementById('auth-step-email').style.display = 'none';
+  document.getElementById('auth-step-otp').style.display   = 'flex';
+  document.getElementById('otp-sent-to').textContent = `We sent a 6-digit code to ${email}`;
+  document.getElementById('auth-otp').value = '';
+  document.getElementById('auth-otp').focus();
+  startCountdown(600);
+};
+
+window.resendOTP = function() {
+  document.getElementById('auth-step-otp').style.display   = 'none';
+  document.getElementById('auth-step-email').style.display = 'flex';
+  window.sendOTP();
+};
+
+window.backToEmail = function() {
+  clearInterval(timerInterval);
+  setError('otp-error', '');
+  document.getElementById('auth-step-otp').style.display   = 'none';
+  document.getElementById('auth-step-email').style.display = 'flex';
+};
+
+// ── OTP Verify ─────────────────────────────────────────────
+window.verifyOTP = async function() {
+  const entered = document.getElementById('auth-otp').value.trim();
+  if (!/^\d{6}$/.test(entered)) return setError('otp-error', 'Enter the 6-digit code.');
+  if (Date.now() > otpExpiry) return setError('otp-error', 'Code has expired. Please request a new one.');
+
+  const btn = document.getElementById('verify-otp-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verifying…';
+
+  const enteredHash = await sha256(otpSalt + entered);
+  if (enteredHash !== otpHash) {
+    btn.disabled = false; btn.textContent = 'Verify & Sign In';
+    return setError('otp-error', 'Incorrect code. Please try again.');
+  }
+
+  setError('otp-error', '');
+
+  // Sign into Firebase anonymously (tied to this device session)
+  // The user identity is their email, data is stored by email key
+  try {
+    await signInAnonymously(auth);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Verify & Sign In';
+    return setError('otp-error', 'Sign-in failed. Try again.');
+  }
+
+  clearInterval(timerInterval);
+  btn.disabled = false; btn.textContent = 'Verify & Sign In';
+
+  // Clean up OTP record
+  try { await setDoc(doc(db, 'otp_requests', currentEmail.replace(/[.@]/g,'_')), { used: true }); } catch(_) {}
+
+  window._userEmail = currentEmail;
+  await loadUserData();
+};
+
+// ── Data Layer ─────────────────────────────────────────────
+const docKey = () => currentEmail.replace(/[.@]/g,'_');
+
+async function loadUserData() {
+  document.getElementById('auth-screen').style.display = 'none';
+
+  try {
+    const snap = await getDoc(doc(db, 'tracker_data', docKey()));
+    if (snap.exists()) {
+      window.data = snap.data().payload;
+      render();
+    } else {
+      showSetup();
+    }
+  } catch(e) {
+    toast('Could not load your data. Check your connection.');
+    showSetup();
+  }
+}
+
+window.saveToCloud = async function() {
+  if (!window.data || !currentEmail) return;
+  const dot = document.getElementById('save-dot');
+  dot.classList.add('pulse');
+  try {
+    await setDoc(doc(db, 'tracker_data', docKey()), {
+      payload: window.data,
+      updatedAt: new Date().toISOString()
+    });
+  } catch(e) {
+    toast('⚠ Save failed — check your connection.');
+  }
+};
+
+// ── Sign Out ───────────────────────────────────────────────
+window.signOut = async function() {
+  if (!confirm('Sign out? Your data is saved to the cloud.')) return;
+  await fbSignOut(auth);
+  window.data = null;
+  currentEmail = '';
+  document.getElementById('tracker-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display   = 'none';
+  document.getElementById('auth-screen').style.display    = 'flex';
+  document.getElementById('auth-step-email').style.display = 'flex';
+  document.getElementById('auth-step-otp').style.display   = 'none';
+  document.getElementById('auth-email').value = '';
+};
+
+// Auto-restore session if email remembered in sessionStorage
+const savedEmail = sessionStorage.getItem('st_email');
+if (savedEmail) {
+  currentEmail = savedEmail;
+  signInAnonymously(auth).then(() => loadUserData()).catch(() => {});
+}
+
+// ── Enter key shortcuts ────────────────────────────────────
+document.getElementById('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') window.sendOTP(); });
+document.getElementById('auth-otp').addEventListener('keydown',   e => { if (e.key === 'Enter') window.verifyOTP(); });
+document.getElementById('auth-otp').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g,'').slice(0,6);
+});
+
+// Persist email in sessionStorage (not localStorage) for tab session only
+Object.defineProperty(window, '_userEmail', {
+  set(v) { currentEmail = v; sessionStorage.setItem('st_email', v); }
+});
+
+</script>
+
+<!-- EmailJS (free OTP email delivery) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // Replace 'PUBLIC_KEY' with your EmailJS public key
+  emailjs.init({ publicKey: 'PUBLIC_KEY' });
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  APP LOGIC  (no Firebase dependency — uses window.saveToCloud)
+// ════════════════════════════════════════════════════════════
+
+const maxCats = 20;
+const colors  = ['#2dd4bf','#3b82f6','#f97316','#a855f7','#ec4899','#eab308','#10b981','#ef4444','#06b6d4','#f59e0b','#8b5cf6','#84cc16'];
+
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => window.saveToCloud && window.saveToCloud(), 1200);
+}
+
+function showSetup() {
+  document.getElementById('setup-screen').style.display = 'flex';
+  const today = new Date();
+  document.getElementById('start-date').value = today.toISOString().split('T')[0];
+  catList.innerHTML = '';
+  addCat('Botany','Chapter 1', 7);
+  addCat('Agronomy','Chap 2', 14);
+  addCat('Soil','Chap 3', 7);
+}
+
+// ── Setup UI ───────────────────────────────────────────────
 const catList = document.getElementById('category-list');
-const _today = new Date();
-document.getElementById('start-date').value = _today.toISOString().split('T')[0];
 
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.onclick = (e) => {
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
     const val = e.target.getAttribute('data-days');
-    const input = document.getElementById('total-days');
-    if (val === 'custom') { input.style.display = 'block'; input.focus(); }
-    else { input.style.display = 'none'; input.value = val; }
+    const inp = document.getElementById('total-days');
+    if (val === 'custom') { inp.style.display = 'block'; inp.focus(); }
+    else { inp.style.display = 'none'; inp.value = val; }
   };
 });
 
 document.getElementById('add-cat-btn').onclick = () => addCat('','','');
+
 function addCat(name='', target='', days='', container=null) {
   const list = container || catList;
   if (list.children.length >= maxCats) return;
   const row = document.createElement('div');
-  row.className = container ? 'modal-cat-row cat-row' : 'cat-row';
+  row.className = 'cat-row';
   row.innerHTML = `
-    <input type="text" placeholder="Category name" value="${name}" class="cn">
-    <input type="text" placeholder="Target / Chapter" value="${target}" class="ct">
-    <input type="number" placeholder="Days" value="${days}" class="cd" min="1" title="Target days">
-    <button class="rm-btn" title="Remove">✕</button>
+    <input type="text"   placeholder="Category name" value="${name}"   class="f-input cn">
+    <input type="text"   placeholder="Target / Chapter" value="${target}" class="f-input ct">
+    <input type="number" placeholder="Days" value="${days}" class="f-input cd" min="1">
+    <button class="rm-btn">✕</button>
   `;
   row.querySelector('.rm-btn').onclick = () => { row.remove(); updateCatCount(); };
   list.appendChild(row);
   updateCatCount();
 }
+
 function updateCatCount() {
   const n = catList.children.length;
   document.getElementById('cat-count').textContent = `${n} / ${maxCats}`;
   document.getElementById('add-cat-btn').style.display = n >= maxCats ? 'none' : 'block';
 }
 
-addCat('Botany','Chapter 1', 7);
-addCat('Agronomy','Chap 2', 14);
-addCat('Soil','Chap 3', 7);
-
-// ── GENERATE ─────────────────────────────────────────────
+// ── Generate ───────────────────────────────────────────────
 function generateTracker() {
-  const startVal = document.getElementById('start-date').value;
+  const startVal  = document.getElementById('start-date').value;
   const totalDays = parseInt(document.getElementById('total-days').value);
-  if (!startVal) return toast('Pick a start date');
+  if (!startVal)             return toast('Pick a start date');
   if (!totalDays || totalDays < 7) return toast('Minimum 7 days');
 
   const cats = [];
-  let exceedError = false;
+  let err = false;
   document.querySelectorAll('#category-list .cat-row').forEach(r => {
     const n = r.querySelector('.cn').value.trim();
     const t = r.querySelector('.ct').value.trim();
     const d = parseInt(r.querySelector('.cd').value);
-    if (n && !isNaN(d) && d > totalDays) exceedError = true;
-    if (n) cats.push({ name: n, target: t || '—', targetDays: isNaN(d) || d < 1 ? totalDays : d, archived: false });
+    if (n && !isNaN(d) && d > totalDays) err = true;
+    if (n) cats.push({ name: n, target: t || '—', targetDays: isNaN(d)||d<1 ? totalDays : d, archived: false });
   });
 
-  if (exceedError) return toast('Category days cannot exceed overall duration');
+  if (err)        return toast('Category days cannot exceed overall duration');
   if (!cats.length) return toast('Add at least one category');
 
   const numWeeks = Math.ceil(totalDays / 7);
@@ -425,92 +759,68 @@ function generateTracker() {
     rows: cats.map((c, ci) => ({ section: c.name, target: c.target, catIdx: ci, days: Array(7).fill(false) }))
   }));
 
-  data = { startDate: startVal, totalDays, categories: cats, weeks, version: 2 };
+  window.data = { startDate: startVal, totalDays, categories: cats, weeks, version: 3 };
   save(); render();
 }
 
-// ── EXTEND MODAL ──────────────────────────────────────────
+// ── Extend Modal ───────────────────────────────────────────
 function openExtendModal() {
-  if (!data) return;
-
-  // Show current categories status
-  const curDiv = document.getElementById('modal-cur-cats');
-  curDiv.innerHTML = '';
-  data.categories.forEach((cat, idx) => {
+  if (!window.data) return;
+  const cur = document.getElementById('modal-cur-cats');
+  cur.innerHTML = '';
+  window.data.categories.forEach((cat, idx) => {
     const prog = getCatProgress(idx);
-    const isDone = prog.pct >= 100;
-    curDiv.innerHTML += `
+    cur.innerHTML += `
       <div class="cur-cat-row">
-        <div class="cur-cat-dot" style="background:${colors[idx % colors.length]}"></div>
+        <div class="cur-cat-dot" style="background:${colors[idx%colors.length]}"></div>
         <span class="cur-cat-name">${cat.name}</span>
-        <span class="cur-cat-status ${isDone ? 'done' : 'ongoing'}">${isDone ? '✓ done' : prog.pct + '% done'}</span>
+        <span class="cur-cat-st ${prog.pct>=100?'done':'ongoing'}">${prog.pct>=100?'✓ done':prog.pct+'%'}</span>
       </div>`;
   });
-
-  // Set days hint
   document.getElementById('ext-days').value = '';
-  document.getElementById('ext-days-hint').textContent = `Current total: ${data.totalDays} days`;
-
-  // Clear new cats
-  const newCatsList = document.getElementById('modal-new-cats');
-  newCatsList.innerHTML = '';
-  document.getElementById('modal-add-cat-btn').onclick = () => addCat('','','', newCatsList);
-
+  document.getElementById('ext-days-hint').textContent = `Current total: ${window.data.totalDays} days`;
+  document.getElementById('modal-new-cats').innerHTML = '';
+  document.getElementById('modal-add-cat-btn').onclick = () => addCat('','','', document.getElementById('modal-new-cats'));
   document.getElementById('extend-modal').classList.add('open');
 }
 
-function closeExtendModal() {
-  document.getElementById('extend-modal').classList.remove('open');
-}
+function closeExtendModal() { document.getElementById('extend-modal').classList.remove('open'); }
 
 function applyExtension() {
   const extraDays = parseInt(document.getElementById('ext-days').value) || 0;
   const newCatRows = document.querySelectorAll('#modal-new-cats .cat-row');
-
-  // Parse new categories
   const newCats = [];
   newCatRows.forEach(r => {
     const n = r.querySelector('.cn').value.trim();
     const t = r.querySelector('.ct').value.trim();
     const d = parseInt(r.querySelector('.cd').value);
-    if (n) newCats.push({ name: n, target: t || '—', targetDays: isNaN(d) || d < 1 ? 30 : d, archived: false });
+    if (n) newCats.push({ name: n, target: t||'—', targetDays: isNaN(d)||d<1?30:d, archived: false });
   });
 
-  if (extraDays === 0 && newCats.length === 0) {
-    return toast('Nothing to apply — add days or new categories');
-  }
+  if (extraDays === 0 && newCats.length === 0) return toast('Nothing to apply');
 
-  // Archive categories that are 100% complete
-  data.categories.forEach((cat, idx) => {
+  // Archive 100% complete categories
+  window.data.categories.forEach((cat, idx) => {
     const prog = getCatProgress(idx);
     if (prog.pct >= 100 && !cat.archived) {
       cat.archived = true;
       cat.completedAt = new Date().toISOString().split('T')[0];
-      cat.finalPct = prog.pct;
       cat.finalChecked = prog.checked;
     }
   });
 
-  // Add new days
-  if (extraDays > 0) {
-    const oldWeekCount = data.weeks.length;
-    data.totalDays += extraDays;
-    const newWeekCount = Math.ceil(data.totalDays / 7);
-    
-    // All active (non-archived) categories
-    const activeCatIdxs = data.categories
-      .map((c, i) => ({ c, i }))
-      .filter(x => !x.c.archived)
-      .map(x => x.i);
+  const activeCatIdxs = window.data.categories.map((c,i)=>({c,i})).filter(x=>!x.c.archived).map(x=>x.i);
 
-    // Extend existing weeks that might be partial (if existing last week is full, no action needed)
-    // Add new weeks
-    for (let wk = oldWeekCount + 1; wk <= newWeekCount; wk++) {
-      data.weeks.push({
+  if (extraDays > 0) {
+    const oldWks = window.data.weeks.length;
+    window.data.totalDays += extraDays;
+    const newWks = Math.ceil(window.data.totalDays / 7);
+    for (let wk = oldWks + 1; wk <= newWks; wk++) {
+      window.data.weeks.push({
         wk,
         rows: activeCatIdxs.map(ci => ({
-          section: data.categories[ci].name,
-          target: data.categories[ci].target,
+          section: window.data.categories[ci].name,
+          target:  window.data.categories[ci].target,
           catIdx: ci,
           days: Array(7).fill(false)
         }))
@@ -518,67 +828,52 @@ function applyExtension() {
     }
   }
 
-  // Add new categories
   if (newCats.length > 0) {
-    const startIdx = data.categories.length;
+    const startIdx = window.data.categories.length;
     newCats.forEach((cat, ni) => {
       const catIdx = startIdx + ni;
-      data.categories.push(cat);
-      // Add rows to all weeks
-      data.weeks.forEach(w => {
-        w.rows.push({
-          section: cat.name,
-          target: cat.target,
-          catIdx,
-          days: Array(7).fill(false)
-        });
+      window.data.categories.push(cat);
+      window.data.weeks.forEach(w => {
+        w.rows.push({ section: cat.name, target: cat.target, catIdx, days: Array(7).fill(false) });
       });
     });
   }
 
-  closeExtendModal();
-  save();
-  render();
-  toast(`Plan updated! ${extraDays > 0 ? `+${extraDays} days. ` : ''}${newCats.length > 0 ? `+${newCats.length} categories.` : ''}`);
+  closeExtendModal(); save(); render();
+  toast(`Updated! ${extraDays>0?`+${extraDays} days. `:''}${newCats.length>0?`+${newCats.length} categories.`:''}`);
 }
 
-// ── RENDER ───────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────
 let calViewDate = null;
 
-function getCatProgress(catIdx) {
-  if (!data) return { checked: 0, target: 1, pct: 0 };
-  const cat = data.categories[catIdx];
-  if (!cat) return { checked: 0, target: 1, pct: 0 };
-  const target = cat.targetDays;
-  const allRows = data.weeks.flatMap(w => w.rows.filter(r => r.catIdx === catIdx));
-  const checked = allRows.flatMap(r => r.days).filter(Boolean).length;
-  const pct = Math.min(100, Math.round((checked / target) * 100));
-  return { checked, target, pct };
+function render() {
+  document.getElementById('setup-screen').style.display  = 'none';
+  document.getElementById('tracker-screen').style.display= 'flex';
+  document.getElementById('t-title').textContent = `${window.data.totalDays}-Day Study Plan`;
+  document.getElementById('t-start-date').textContent = `Started ${new Date(window.data.startDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+  calViewDate = null;
+  buildNav(); buildCards(); buildArchivedSection(); updateDash();
 }
 
-function render() {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('tracker-screen').style.display = 'flex';
-  document.getElementById('t-title').textContent = `${data.totalDays}-Day Study Plan`;
-  document.getElementById('t-start-date').textContent = `Started ${new Date(data.startDate).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`;
-  calViewDate = null;
-  buildNav();
-  buildCards();
-  buildArchivedSection();
-  updateDash();
+function getCatProgress(catIdx) {
+  const cat = window.data?.categories?.[catIdx];
+  if (!cat) return { checked:0, target:1, pct:0 };
+  const target  = cat.targetDays;
+  const checked = window.data.weeks.flatMap(w => w.rows.filter(r=>r.catIdx===catIdx).flatMap(r=>r.days)).filter(Boolean).length;
+  return { checked, target, pct: Math.min(100, Math.round(checked/target*100)) };
 }
 
 function buildNav() {
   const nav = document.getElementById('nav-pills');
   nav.innerHTML = '';
-  data.weeks.forEach((w, i) => {
+  window.data.weeks.forEach((w, i) => {
     const b = document.createElement('button');
-    b.className = 'nav-btn' + (i === 0 ? ' active' : '');
+    b.className = 'nav-btn' + (i===0?' active':'');
     b.textContent = `W${w.wk}`;
     b.onclick = () => {
-      document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
-      document.getElementById(`w-sec-${w.wk}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(`w-sec-${w.wk}`)?.scrollIntoView({ behavior:'smooth', block:'start' });
     };
     nav.appendChild(b);
   });
@@ -587,279 +882,202 @@ function buildNav() {
 function buildCards() {
   const container = document.getElementById('tracker-content');
   container.innerHTML = '';
-
-  data.weeks.forEach(w => {
+  window.data.weeks.forEach(w => {
+    const activeRows = w.rows.filter(r => !window.data.categories[r.catIdx]?.archived);
+    if (!activeRows.length) return;
     const sec = document.createElement('div');
-    sec.className = 'week-section';
-    sec.id = `w-sec-${w.wk}`;
-
-    // Only show rows for active (non-archived) categories
-    const activeRows = w.rows.filter(r => !data.categories[r.catIdx]?.archived);
-    if (activeRows.length === 0) return; // Skip weeks with no active rows
-
-    const wPct = calcPct(activeRows.flatMap(r => r.days));
-    const hdr = document.createElement('div');
+    sec.className = 'week-section'; sec.id = `w-sec-${w.wk}`;
+    const wPct = calcPct(activeRows.flatMap(r=>r.days));
+    const hdr  = document.createElement('div');
     hdr.className = 'week-header';
     hdr.innerHTML = `<div class="wh-title">WEEK <span>${w.wk}</span></div><div class="wh-pct" id="wh-pct-${w.wk}">${wPct}%</div>`;
     sec.appendChild(hdr);
-
-    const cardsWrap = document.createElement('div');
-    cardsWrap.className = 'cards-container';
-
-    activeRows.forEach((row, ri) => {
+    const wrap = document.createElement('div'); wrap.className = 'cards-container';
+    activeRows.forEach(row => {
       const globalRi = w.rows.indexOf(row);
-      const card = document.createElement('div');
-      card.className = 'cat-card';
+      const card = document.createElement('div'); card.className = 'cat-card';
       const prog = getCatProgress(row.catIdx);
-      const chipClass = prog.pct >= 100 ? 'full' : prog.pct > 0 ? '' : 'zero';
-
-      let html = `
+      const chipCls = prog.pct>=100?'full':prog.pct>0?'':'zero';
+      card.innerHTML = `
         <div class="cc-top">
-          <div>
-            <div class="cc-name">${row.section}</div>
-            <div class="cc-target">${row.target}</div>
-          </div>
+          <div><div class="cc-name">${row.section}</div><div class="cc-target">${row.target}</div></div>
           <div class="cc-top-right">
-            <div class="rem-circle rem-circle-cat-${row.catIdx}" title="Remaining days">0</div>
-            <div class="pct-chip ${chipClass}" id="chip-w${w.wk}-cat${row.catIdx}">${prog.pct}%</div>
+            <div class="rem-circle rem-circle-cat-${row.catIdx}">0</div>
+            <div class="pct-chip ${chipCls}" id="chip-w${w.wk}-cat${row.catIdx}">${prog.pct}%</div>
           </div>
         </div>
         <div class="orange-box">
-          <div class="ob-day">D1</div><div class="ob-day">D2</div><div class="ob-day">D3</div>
-          <div class="ob-day">D4</div><div class="ob-day">D5</div><div class="ob-day">D6</div><div class="ob-day">D7</div>
+          ${['D1','D2','D3','D4','D5','D6','D7'].map(d=>`<div class="ob-day">${d}</div>`).join('')}
         </div>
-        <div class="checks-row">
-      `;
-      card.innerHTML = html;
-
+        <div class="checks-row"></div>`;
       const checksRow = card.querySelector('.checks-row');
       row.days.forEach((done, di) => {
-        const wrap = document.createElement('div'); wrap.className = 'check-btn-wrap';
-        const btn = document.createElement('div');
-        let btnClass = 'check-btn';
-        if (done) btnClass += ' done';
-        else if (prog.checked >= prog.target) btnClass += ' blocked';
-        btn.className = btnClass;
+        const wrap2 = document.createElement('div'); wrap2.className = 'check-btn-wrap';
+        const btn   = document.createElement('div');
+        btn.className = 'check-btn' + (done?' done': prog.checked>=prog.target?' blocked':'');
         btn.innerHTML = done ? '✓' : '·';
         btn.id = `btn-w${w.wk}-cat${row.catIdx}-d${di}`;
         btn.onclick = () => toggle(w.wk, globalRi, di, row.catIdx);
-        wrap.appendChild(btn);
-        checksRow.appendChild(wrap);
+        wrap2.appendChild(btn); checksRow.appendChild(wrap2);
       });
-
-      cardsWrap.appendChild(card);
+      wrap.appendChild(card);
     });
-
-    sec.appendChild(cardsWrap);
-    container.appendChild(sec);
+    sec.appendChild(wrap); container.appendChild(sec);
   });
 }
 
 function buildArchivedSection() {
-  const archivedCats = data.categories.filter(c => c.archived);
+  const arcCats = window.data.categories.filter(c=>c.archived);
   const section = document.getElementById('archived-section');
-  const list = document.getElementById('archived-list');
-  const badge = document.getElementById('arc-badge');
-
-  if (archivedCats.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
+  if (!arcCats.length) { section.style.display='none'; return; }
   section.style.display = 'block';
-  badge.textContent = archivedCats.length;
-  list.innerHTML = '';
-
-  data.categories.forEach((cat, idx) => {
+  document.getElementById('arc-badge').textContent = arcCats.length;
+  const list = document.getElementById('archived-list'); list.innerHTML='';
+  window.data.categories.forEach((cat, idx) => {
     if (!cat.archived) return;
-    const prog = getCatProgress(idx);
-    const col = colors[idx % colors.length];
-    const checkedDays = cat.finalChecked || prog.checked;
-    const card = document.createElement('div');
-    card.className = 'archived-card';
+    const col = colors[idx%colors.length];
+    const card = document.createElement('div'); card.className='archived-card';
     card.innerHTML = `
       <div class="arc-dot" style="background:${col}"></div>
       <div class="arc-info">
         <div class="arc-name">${cat.name}</div>
-        <div class="arc-meta">${cat.target} · ${checkedDays} / ${cat.targetDays} days checked${cat.completedAt ? ' · Completed ' + cat.completedAt : ''}</div>
+        <div class="arc-meta">${cat.target} · ${cat.finalChecked||cat.targetDays}/${cat.targetDays} days${cat.completedAt?' · Completed '+cat.completedAt:''}</div>
       </div>
-      <div class="arc-pct">✓ 100%</div>
-    `;
+      <div class="arc-pct">✓ 100%</div>`;
     list.appendChild(card);
   });
 }
 
 function toggleArchived() {
-  const toggle = document.getElementById('archived-toggle');
-  const list = document.getElementById('archived-list');
-  toggle.classList.toggle('open');
-  list.classList.toggle('open');
+  document.getElementById('archived-toggle').classList.toggle('open');
+  document.getElementById('archived-list').classList.toggle('open');
 }
 
 function updateCategoryUI(catIdx) {
   const prog = getCatProgress(catIdx);
-  const chipClass = prog.pct >= 100 ? 'full' : prog.pct > 0 ? '' : 'zero';
-  data.weeks.forEach(w => {
+  const chipCls = prog.pct>=100?'full':prog.pct>0?'':'zero';
+  window.data.weeks.forEach(w => {
     const chip = document.getElementById(`chip-w${w.wk}-cat${catIdx}`);
-    if (chip) { chip.textContent = `${prog.pct}%`; chip.className = 'pct-chip ' + chipClass; }
-    const row = w.rows.find(r => r.catIdx === catIdx);
-    if (row) {
-      row.days.forEach((done, di) => {
-        const btn = document.getElementById(`btn-w${w.wk}-cat${catIdx}-d${di}`);
-        if (btn) {
-          let btnClass = 'check-btn';
-          if (done) btnClass += ' done';
-          else if (prog.checked >= prog.target) btnClass += ' blocked';
-          btn.className = btnClass;
-          btn.innerHTML = done ? '✓' : '·';
-        }
-      });
-    }
+    if (chip) { chip.textContent=`${prog.pct}%`; chip.className='pct-chip '+chipCls; }
+    const row = w.rows.find(r=>r.catIdx===catIdx);
+    if (row) row.days.forEach((done,di) => {
+      const btn = document.getElementById(`btn-w${w.wk}-cat${catIdx}-d${di}`);
+      if (btn) { btn.className='check-btn'+(done?' done':prog.checked>=prog.target?' blocked':''); btn.innerHTML=done?'✓':'·'; }
+    });
   });
 }
 
 function toggle(wk, ri, di, catIdx) {
-  const w = data.weeks.find(x => x.wk === wk);
+  const w = window.data.weeks.find(x=>x.wk===wk);
   const isDone = w.rows[ri].days[di];
   const progBefore = getCatProgress(catIdx);
   if (!isDone && progBefore.checked >= progBefore.target) {
-    toast(`Target of ${progBefore.target} days reached for this category!`);
-    return;
+    return toast(`Target of ${progBefore.target} days reached!`);
   }
   w.rows[ri].days[di] = !isDone;
   updateCategoryUI(catIdx);
-
-  const activeRows = w.rows.filter(r => !data.categories[r.catIdx]?.archived);
-  const wPct = calcPct(activeRows.flatMap(r => r.days));
-  const wEl = document.getElementById(`wh-pct-${wk}`);
-  if (wEl) wEl.textContent = `${wPct}%`;
-
+  const activeRows = w.rows.filter(r=>!window.data.categories[r.catIdx]?.archived);
+  const wPct = calcPct(activeRows.flatMap(r=>r.days));
+  const el = document.getElementById(`wh-pct-${wk}`);
+  if (el) el.textContent = `${wPct}%`;
   save(); updateDash();
 }
 
 function updateDash() {
-  const sd = new Date(data.startDate); sd.setHours(0,0,0,0);
+  const sd    = new Date(window.data.startDate); sd.setHours(0,0,0,0);
   const today = new Date(); today.setHours(0,0,0,0);
-  const elapsed = Math.max(0, Math.min(data.totalDays, Math.floor((today - sd) / 86400000)));
+  const elapsed = Math.max(0, Math.min(window.data.totalDays, Math.floor((today-sd)/86400000)));
   document.getElementById('d-passed').textContent = elapsed;
-  document.getElementById('d-left').textContent = Math.max(0, data.totalDays - elapsed);
+  document.getElementById('d-left').textContent   = Math.max(0, window.data.totalDays-elapsed);
 
-  let totalTargets = 0, allCompleted = 0;
-  const catDiv = document.getElementById('d-cats');
-  catDiv.innerHTML = '';
+  let totalT=0, allC=0;
+  const catDiv = document.getElementById('d-cats'); catDiv.innerHTML='';
 
-  data.categories.forEach((cat, idx) => {
-    if (cat.archived) return; // Skip archived in dashboard active list
-    const completedDays = data.weeks.flatMap(w => w.rows.filter(r => r.catIdx === idx).flatMap(r => r.days)).filter(Boolean).length;
-    totalTargets += cat.targetDays;
-    allCompleted += completedDays;
-
-    const remaining = Math.max(0, cat.targetDays - completedDays);
-    document.querySelectorAll(`.rem-circle-cat-${idx}`).forEach(el => { el.textContent = remaining; });
-
-    const p = Math.min(100, Math.round((completedDays / cat.targetDays) * 100)) || 0;
-    const col = colors[idx % colors.length];
+  window.data.categories.forEach((cat, idx) => {
+    const done = window.data.weeks.flatMap(w=>w.rows.filter(r=>r.catIdx===idx).flatMap(r=>r.days)).filter(Boolean).length;
+    totalT += cat.targetDays;
+    allC   += cat.archived ? (cat.finalChecked||cat.targetDays) : done;
+    if (cat.archived) {
+      document.querySelectorAll(`.rem-circle-cat-${idx}`).forEach(el => { el.textContent='✓'; el.style.color='var(--done-fg)'; });
+      return;
+    }
+    const remaining = Math.max(0, cat.targetDays - done);
+    document.querySelectorAll(`.rem-circle-cat-${idx}`).forEach(el => { el.textContent=remaining; el.style.color=''; });
+    const p = Math.min(100, Math.round(done/cat.targetDays*100))||0;
+    const col = colors[idx%colors.length];
     catDiv.innerHTML += `
       <div class="prog-item">
         <span class="p-name">${cat.name}</span>
-        <div class="p-bar-wrap"><div class="p-bar" style="width:${p}%; background:${col}"></div></div>
+        <div class="p-bar-wrap"><div class="p-bar" style="width:${p}%;background:${col}"></div></div>
         <span class="p-pct" style="color:${col}">${p}%</span>
       </div>`;
   });
 
-  // Include archived in overall count
-  data.categories.forEach((cat, idx) => {
-    if (!cat.archived) return;
-    totalTargets += cat.targetDays;
-    allCompleted += (cat.finalChecked || cat.targetDays);
-  });
+  const gPct = totalT>0 ? Math.min(100,Math.round(allC/totalT*100)) : 0;
+  document.getElementById('d-overall').textContent = gPct+'%';
+  document.getElementById('ring-arc').style.strokeDashoffset = 201-(gPct/100)*201;
 
-  const globalPct = totalTargets > 0 ? Math.min(100, Math.round((allCompleted / totalTargets) * 100)) : 0;
-  document.getElementById('d-overall').textContent = globalPct + '%';
-  document.getElementById('ring-arc').style.strokeDashoffset = 201 - (globalPct / 100) * 201;
-
-  const wDiv = document.getElementById('d-weeks');
-  wDiv.innerHTML = '';
-  data.weeks.forEach(w => {
-    const activeRows = w.rows.filter(r => !data.categories[r.catIdx]?.archived);
-    if (activeRows.length === 0) return;
-    const p = calcPct(activeRows.flatMap(r => r.days));
+  const wDiv = document.getElementById('d-weeks'); wDiv.innerHTML='';
+  window.data.weeks.forEach(w => {
+    const ar = w.rows.filter(r=>!window.data.categories[r.catIdx]?.archived);
+    if (!ar.length) return;
+    const p = calcPct(ar.flatMap(r=>r.days));
     wDiv.innerHTML += `
       <div class="prog-item">
         <span class="p-name" style="font-family:var(--mono)">W${w.wk}</span>
-        <div class="p-bar-wrap"><div class="p-bar" style="width:${p}%; background:var(--blue)"></div></div>
+        <div class="p-bar-wrap"><div class="p-bar" style="width:${p}%;background:var(--blue)"></div></div>
         <span class="p-pct">${p}%</span>
       </div>`;
   });
-
   buildMiniCal();
 }
 
-// ── CALENDAR ──────────────────────────────────────────────
-document.getElementById('mc-prev').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() - 1); buildMiniCal(); };
-document.getElementById('mc-next').onclick = () => { calViewDate.setMonth(calViewDate.getMonth() + 1); buildMiniCal(); };
+// ── Calendar ───────────────────────────────────────────────
+document.getElementById('mc-prev').onclick = () => { calViewDate.setMonth(calViewDate.getMonth()-1); buildMiniCal(); };
+document.getElementById('mc-next').onclick = () => { calViewDate.setMonth(calViewDate.getMonth()+1); buildMiniCal(); };
 
 function buildMiniCal() {
-  if (!data) return;
-  const grid = document.getElementById('mc-grid');
-  const sd = new Date(data.startDate); sd.setHours(0,0,0,0);
-  const ed = new Date(sd); ed.setDate(ed.getDate() + data.totalDays - 1);
+  if (!window.data) return;
+  const grid  = document.getElementById('mc-grid');
+  const sd    = new Date(window.data.startDate); sd.setHours(0,0,0,0);
+  const ed    = new Date(sd); ed.setDate(ed.getDate()+window.data.totalDays-1);
   const today = new Date(); today.setHours(0,0,0,0);
   if (!calViewDate) calViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
-  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
-  document.getElementById('mc-month').textContent = calViewDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const y=calViewDate.getFullYear(), m=calViewDate.getMonth();
+  document.getElementById('mc-month').textContent = calViewDate.toLocaleDateString('en-US',{month:'short',year:'numeric'});
   grid.innerHTML = '';
-  ['S','M','T','W','T','F','S'].forEach(d => { grid.innerHTML += `<div class="mc-dow">${d}</div>`; });
-  const firstDay = new Date(y, m, 1).getDay();
-  for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="mc-cell empty"></div>`;
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  for (let d = 1; d <= daysInMonth; d++) {
-    const cDate = new Date(y, m, d); cDate.setHours(0,0,0,0);
-    let cls = 'mc-cell';
-    if (cDate < sd || cDate > ed) cls += ' no-plan';
-    else if (cDate.getTime() === today.getTime()) cls += ' today';
-    else if (cDate < today) cls += ' past';
-    else cls += ' future';
-    grid.innerHTML += `<div class="${cls}">${d}</div>`;
+  ['S','M','T','W','T','F','S'].forEach(d => { grid.innerHTML+=`<div class="mc-dow">${d}</div>`; });
+  const firstDay = new Date(y,m,1).getDay();
+  for(let i=0;i<firstDay;i++) grid.innerHTML+=`<div class="mc-cell"></div>`;
+  const dim = new Date(y,m+1,0).getDate();
+  for(let d=1;d<=dim;d++){
+    const cd=new Date(y,m,d); cd.setHours(0,0,0,0);
+    let cls='mc-cell';
+    if(cd<sd||cd>ed) cls+=' no-plan';
+    else if(cd.getTime()===today.getTime()) cls+=' today';
+    else if(cd<today) cls+=' past';
+    else cls+=' future';
+    grid.innerHTML+=`<div class="${cls}">${d}</div>`;
   }
 }
 
-// ── UTILS ──────────────────────────────────────────────────
-function calcPct(arr) { return arr.length ? Math.round(arr.filter(Boolean).length / arr.length * 100) : 0; }
+// ── Utils ──────────────────────────────────────────────────
+function calcPct(arr) { return arr.length ? Math.round(arr.filter(Boolean).length/arr.length*100) : 0; }
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
 }
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-function resetTracker() {
-  if (!confirm('Clear all progress and start over?')) return;
-  localStorage.removeItem(STORAGE_KEY); data = null;
+
+window.resetTracker = function() {
+  if (!confirm('Delete this plan and start a new one? This cannot be undone.')) return;
+  window.data = null;
+  window.saveToCloud && window.saveToCloud();
   document.getElementById('tracker-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'flex';
-}
+  showSetup();
+};
 
-// Close modal on overlay click
-document.getElementById('extend-modal').onclick = (e) => { if (e.target === e.currentTarget) closeExtendModal(); };
-
-// ── INIT ──────────────────────────────────────────────────
-try {
-  // Migrate old strack4 data
-  const oldRaw = localStorage.getItem('strack4');
-  const newRaw = localStorage.getItem(STORAGE_KEY);
-  if (!newRaw && oldRaw) {
-    const old = JSON.parse(oldRaw);
-    old.categories = old.categories.map(c => ({ ...c, archived: false }));
-    old.version = 2;
-    data = old;
-    save();
-    localStorage.removeItem('strack4');
-    render();
-  } else if (newRaw) {
-    data = JSON.parse(newRaw);
-    render();
-  }
-} catch {}
+document.getElementById('extend-modal').onclick = e => { if(e.target===e.currentTarget) closeExtendModal(); };
 </script>
 </body>
 </html>
