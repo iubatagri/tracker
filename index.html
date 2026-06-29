@@ -526,11 +526,11 @@ window.sendOTP = async function() {
 
   // Send OTP via EmailJS (free — see setup guide below)
   try {
-    await emailjs.send('SERVICE_ID', 'TEMPLATE_ID', {
+    await emailjs.send('service_ub4qj0h', 'template_dvdhbl9', {
       to_email: email,
       otp_code: otp,
       expiry_min: 10
-    }, 'PUBLIC_KEY');
+    }, 'WjLVSSc9D3S33gHiI');
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Send Code';
     return setError('email-error', 'Failed to send email. Please try again.');
